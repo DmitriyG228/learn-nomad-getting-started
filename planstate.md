@@ -60,6 +60,7 @@ Bot-manager must transition from Docker socket orchestration to Nomad parameteri
 | KAD-10 | **Local Postgres on Host Port 25432** | For the dev Nomad cluster run a standalone Postgres container published on host **25432**.  All Nomad jobs connect via `postgresql://postgres:postgres@172.17.0.1:25432/vexa`.  This matches the future Cloud SQL pattern (remote TCP socket) and avoids Docker-network reachability issues. |
 | KAD-11 | **Nomad API Reachability in Local Dev** | Using `network { mode = "host" }` for bot-manager is *only* a debugging workaround, not a production pattern. The proper solution is to keep bridge networking and reach Nomad via the Docker host-gateway (`172.17.0.1` or `host.docker.internal`). A follow-up task will restore bridge mode once the connectivity issue is understood. |
 | KAD-12 | **Use simple template variable substitution for BOT_CONFIG JSON generation** | Encode the full `BOT_CONFIG` as **Base64-JSON** in a single environment variable (`BOT_CONFIG_B64`) instead of raw JSON, and generate it with Nomad's `toJSON` → `base64encode` pipeline.  The bot entrypoint will `base64 -d` and parse the JSON. |
+| KAD-13 | **JSON Configuration Shell Parsing Fix** | Nomad template-generated JSON was failing due to shell environment variable parsing stripping quotes. Solution: Use `printf` to build JSON string, then pipe through `toJSON` function to properly escape for shell parsing. This avoids Base64 encoding while ensuring Docker environment variables receive valid JSON. Pattern: `{{ $jsonString := printf "{...}" args... -}}` then `BOT_CONFIG={{ $jsonString | toJSON }}`. |
 
 ## Service Inventory (derived from `docker-compose.yml`)
 | Service | Type | Ports | Notes |
@@ -198,6 +199,7 @@ This roadmap is an executable plan to move the `docker-compose.yml` services to 
    • API endpoint responding correctly: "Vexa Bot Manager is running".
 
 - **COMPLETED ✅ Phase 2D:** End-to-end bot dispatch via Bot-Manager REST API proven working! Successfully completed: POST /bots → Bot-Manager validates request → dispatches vexa-bot via Nomad API → returns meeting record with status "active" and bot_container_id. Two vexa-bot allocations currently running under Nomad.
+- **COMPLETED ✅ JSON Configuration Fix (KAD-13):** Resolved critical JSON parsing issue in bot containers. Root cause: Docker environment variable parsing splits on unescaped whitespace, corrupting JSON. Solution: Use Nomad template `printf` + `toJSON` function to properly escape JSON strings for shell parsing. This eliminates the need for Base64 encoding while ensuring valid JSON delivery to bot containers. Debug harness validated the fix works correctly.
 - **LESSON LEARNED (Nomad Template JSON):** Nomad templates have limitations when generating JSON. Direct JSON construction in templates results in property names losing quotes (`{platform:` instead of `{"platform":`). The issue stems from template processing stripping quotes. Attempted solutions included using `toJSON` function, `dict`/`merge` functions (not available in Nomad templates), and complex escaping strategies.
 - **COMPLETED ✅ ROBUST BOT_CONFIG IMPLEMENTATION:** Successfully implemented the production-grade BOT_CONFIG solution using Python-based JSON generation with Base64 encoding. This eliminates all Nomad template quote-escaping issues by generating the complete configuration in Python (bot-manager), validating it, Base64-encoding it, and passing it as a single metadata field. The Nomad template now simply passes through the encoded configuration, eliminating complex template gymnastics. Verified working with manual dispatch tests showing proper JSON structure in container environment.
 - **LESSON LEARNED (Consul):** Initial deployment failed due to a missing Consul agent. The Nomad agent requires a running Consul agent to be present *at startup* to enable service discovery features. The resolution was to:
@@ -421,3 +423,17 @@ This roadmap is an executable plan to move the `docker-compose.yml` services to 
 ---
 
 *Last Updated: 2025-06-21 - Phase 2D completed successfully with KAD-12 JSON template fix*
+
+## Phase 2F — Reproducible :dev Images & Robust Config (⚡ IN PROGRESS)
+• **Objective:** Standardise on the single `:dev` tag for every service image and guarantee that a single command (`make build`) produces fresh local images for Nomad.
+• **Key Decisions**
+  1. **Image Tag Convention:** Only the `:dev` tag is used during local development. All Nomad jobs reference `services/<name>:dev`.
+  2. **Central Build Script:** A root-level `Makefile` now builds all `:dev` images (`vexa-bot`, `bot-manager`, …). The list is declarative—new services add one line.
+  3. **Fail-Fast Config Delivery:** We reverted to plain JSON in `BOT_CONFIG` (no Base64) following best-practice of storing human-readable JSON in env-vars. The entrypoint still tolerates Base64 for backwards-compat, but Nomad now injects raw JSON.
+  4. **Nomad Template Update:** `jobs/vexa-bot.nomad.hcl` now injects `BOT_CONFIG` (Base64-encoded JSON) instead of the older `BOT_CONFIG_B64` variable to match the entrypoint.
+• **Smoke-Test Plan**
+  1. `make build` → images are rebuilt with the `:dev` tag.
+  2. `nomad run jobs/vexa-bot.nomad.hcl` registers the parameterised job template.
+  3. Manual dispatch joins Google Meet and prints decoded JSON confirmation.
+  4. Bot-Manager dispatch path repeats the same test via REST API.
+• **Validation:** Bot joins the meeting and stops without JSON-parsing errors.

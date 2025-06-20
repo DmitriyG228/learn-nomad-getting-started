@@ -32,8 +32,8 @@ job "vexa-bot" {
       driver = "docker"
       
       config {
-        # Use the real vexa-bot image with browser automation
-        image = "services/vexa-bot:real"
+        # Use the freshly built dev vexa-bot image with browser automation
+        image = "services/vexa-bot:dev"
         force_pull = false
       }
 
@@ -55,19 +55,20 @@ EOH
         env         = true
       }
 
-      # Template for BOT_CONFIG_B64 as base64-encoded JSON (KAD-09)
+      # Template for BOT_CONFIG using toJSON (KAD-13) - fixes shell parsing issue
       template {
         data = <<EOH
 {{ $platform := env "NOMAD_META_platform" | regexReplaceAll "-" "_" -}}
-{{ $meetingUrl := or (env "NOMAD_META_meeting_url") "null" -}}
+{{ $meetingUrl := or (env "NOMAD_META_meeting_url") "" -}}
 {{ $botName := or (env "NOMAD_META_bot_name") "Vexa Bot" -}}
 {{ $token := or (env "NOMAD_META_user_token") "" -}}
 {{ $connectionId := env "NOMAD_META_connection_id" -}}
 {{ $nativeMeetingId := env "NOMAD_META_native_meeting_id" -}}
 {{ $language := or (env "NOMAD_META_language") "en" -}}
 {{ $task := or (env "NOMAD_META_task") "transcribe" -}}
-{{ $meetingId := env "NOMAD_META_meeting_id" -}}
-BOT_CONFIG_B64={{ printf `{"platform":"%s","meetingUrl":"%s","botName":"%s","token":"%s","connectionId":"%s","nativeMeetingId":"%s","language":"%s","task":"%s","redisUrl":"redis://172.17.0.1:31008","automaticLeave":{"waitingRoomTimeout":300000,"noOneJoinedTimeout":60000,"everyoneLeftTimeout":30000},"meeting_id":%s,"reconnectionIntervalMs":5000,"botManagerCallbackUrl":"http://localhost:8080/bots/internal/callback/exited"}` $platform $meetingUrl $botName $token $connectionId $nativeMeetingId $language $task $meetingId | base64Encode }}
+{{ $meetingId := or (env "NOMAD_META_meeting_id") "0" -}}
+{{ $jsonString := printf `{"platform":"%s","meetingUrl":"%s","botName":"%s","token":"%s","connectionId":"%s","nativeMeetingId":"%s","language":"%s","task":"%s","redisUrl":"redis://172.17.0.1:31008","automaticLeave":{"waitingRoomTimeout":300000,"noOneJoinedTimeout":60000,"everyoneLeftTimeout":30000},"meeting_id":%s,"reconnectionIntervalMs":5000,"botManagerCallbackUrl":"http://localhost:8080/bots/internal/callback/exited"}` $platform $meetingUrl $botName $token $connectionId $nativeMeetingId $language $task $meetingId -}}
+BOT_CONFIG={{ $jsonString | toJSON }}
 EOH
         destination = "local/bot-config.env"
         env         = true

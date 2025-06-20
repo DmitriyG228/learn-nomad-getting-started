@@ -19,6 +19,7 @@ job "bot-manager" {
       config {
         image = "services/bot-manager:dev"
         ports = ["http"]
+        force_pull = false  # Use local image, don't try to pull from registry
         # Use container default port (8080) with bridge networking
       }
 
