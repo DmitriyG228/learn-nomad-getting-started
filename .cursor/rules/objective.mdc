@@ -1,0 +1,20 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+1.1 Project objective:
+Deploy the services defined in [docker-compose.yml](mdc:vexa/docker-compose.yml) to production on Google Cloud Platform (GCP) using Terraform and HashiCorp Nomad.
+
+
+
+
+2. Key constraints and guidance:
+- 2.1  Our Nomad expertise is limited; proceed cautiously and prioritize learning from authoritative sources.
+- 2.2 Rely on official documentation, community-vetted templates, and best-practice tutorials for Nomad, Terraform, and the surrounding ecosystem.
+- 2.3 Validate each design decision against up-to-date references before implementation.
+- 2.4 Continuously research and cross-check ideas to ensure they align with proven production practices.
+
+
+
+

@@ -49,3 +49,9 @@ variable "nomad_version" {
   description = "The version of the Nomad binary to install."
   default     = "1.5.0"
 }
+
+variable "network_cidr_range" {
+  description = "CIDR range for the custom VPC subnet used by Nomad cluster."
+  type        = string
+  default     = "10.10.0.0/16"
+}

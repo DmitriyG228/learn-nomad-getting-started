@@ -13,7 +13,16 @@ provider "google" {
 }
 
 resource "google_compute_network" "hashistack" {
-  name = "hashistack-${var.name}"
+  name                    = "hashistack-${var.name}"
+  auto_create_subnetworks = true
+}
+
+# Custom subnet for Nomad cluster
+resource "google_compute_subnetwork" "hashistack" {
+  name          = "hashistack-${var.name}-subnet"
+  ip_cidr_range = var.network_cidr_range
+  region        = var.region
+  network       = google_compute_network.hashistack.id
 }
 
 resource "google_compute_firewall" "nomad_ui_ingress" {
@@ -60,19 +69,27 @@ resource "google_compute_firewall" "allow_all_internal" {
   }
 }
 
+resource "google_compute_firewall" "consul_ui_ingress" {
+  name          = "${var.name}-consul-ui-ingress"
+  network       = google_compute_network.hashistack.name
+  source_ranges = [var.allowlist_ip]
+
+  allow {
+    protocol = "tcp"
+    ports    = [8500]
+  }
+}
+
 resource "google_compute_firewall" "clients_ingress" {
   name          = "${var.name}-clients-ingress"
   network       = google_compute_network.hashistack.name
   source_ranges = [var.allowlist_ip]
   target_tags   = ["nomad-clients"]
 
-  # Add application ingress rules here
-  # These rules are applied only to the client nodes
-
-  # example app on port 5000, replace with your application port
+  # Application ingress rules to client nodes
   allow {
     protocol = "tcp"
-    ports    = [5000]
+    ports    = ["80", "443"]
   }
 }
 
@@ -122,7 +139,8 @@ resource "google_compute_instance" "server" {
   }
 
   network_interface {
-    network = google_compute_network.hashistack.name
+    network    = google_compute_network.hashistack.name
+    subnetwork = google_compute_subnetwork.hashistack.name
     access_config {
       // Leave empty to get an ephemeral public IP
     }
@@ -182,7 +200,8 @@ resource "google_compute_instance" "client" {
   }
 
   network_interface {
-    network = google_compute_network.hashistack.name
+    network    = google_compute_network.hashistack.name
+    subnetwork = google_compute_subnetwork.hashistack.name
     access_config {
       // Leave empty to get an ephemeral public IP
     }

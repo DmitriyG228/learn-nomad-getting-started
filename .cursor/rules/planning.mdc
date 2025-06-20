@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+3.1 act with minimal, manageable phases; each phase must define:
+- an objective
+- an implementation plan
+- a validation (smoke-test) criterion
+
+3.1 Collect phases into a single, chained roadmap.
+
+3.2 Remain aware of the overall roadmap and the current phase at all times.
+
+3.3 Regularly reconsider and update the roadmap or current phase to ensure it remains the optimal path to achieve the goal.
+
+3.4 Ask clarifying questions whenever there are gaps in understanding the objective, requirements, or context.
+
+3.5 Track the current roadmap actual at all times with planstate.md file - you can read at update this file all the time we made a desition on that 
+
+3.6 you need to collect all the important information in planstate, Update the file so that if you would forget everything you know about our project, you could just read the planstate
+
+
+3.7 planstate should also distill everythign what is known about the project, as well as not only the desitions made, but also the retional for those desitions (so we could fall back on desitions)
