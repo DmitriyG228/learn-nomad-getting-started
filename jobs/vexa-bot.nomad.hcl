@@ -67,7 +67,8 @@ EOH
 {{ $language := or (env "NOMAD_META_language") "en" -}}
 {{ $task := or (env "NOMAD_META_task") "transcribe" -}}
 {{ $meetingId := or (env "NOMAD_META_meeting_id") "0" -}}
-{{ $jsonString := printf `{"platform":"%s","meetingUrl":"%s","botName":"%s","token":"%s","connectionId":"%s","nativeMeetingId":"%s","language":"%s","task":"%s","redisUrl":"redis://172.17.0.1:31008","automaticLeave":{"waitingRoomTimeout":300000,"noOneJoinedTimeout":60000,"everyoneLeftTimeout":30000},"meeting_id":%s,"reconnectionIntervalMs":5000,"botManagerCallbackUrl":"http://localhost:8080/bots/internal/callback/exited"}` $platform $meetingUrl $botName $token $connectionId $nativeMeetingId $language $task $meetingId -}}
+{{ $redisUrl := "redis://172.17.0.1:31357" -}}
+{{ $jsonString := printf `{"platform":"%s","meetingUrl":"%s","botName":"%s","token":"%s","connectionId":"%s","nativeMeetingId":"%s","language":"%s","task":"%s","redisUrl":"%s","automaticLeave":{"waitingRoomTimeout":300000,"noOneJoinedTimeout":60000,"everyoneLeftTimeout":30000},"meeting_id":%s,"reconnectionIntervalMs":5000,"botManagerCallbackUrl":"http://localhost:8080/bots/internal/callback/exited"}` $platform $meetingUrl $botName $token $connectionId $nativeMeetingId $language $task $redisUrl $meetingId -}}
 BOT_CONFIG={{ $jsonString | toJSON }}
 EOH
         destination = "local/bot-config.env"
