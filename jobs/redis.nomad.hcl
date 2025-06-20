@@ -14,8 +14,9 @@ job "redis" {
     # This block registers the Redis instance as a service in Consul,
     # making it discoverable by other jobs. The service will be named "redis".
     service {
-      name = "redis"
-      port = "db"
+      provider = "nomad"  # avoid Consul dependency during dev
+      name     = "redis"
+      port     = "db"
 
       # Health check to ensure the service is actually running.
       check {

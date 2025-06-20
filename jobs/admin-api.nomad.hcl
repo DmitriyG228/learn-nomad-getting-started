@@ -37,17 +37,13 @@ job "admin-api" {
       # It fetches the addresses of the redis and postgres services from Consul.
       template {
         data = <<EOH
-{{ range service "postgres" }}
-DB_HOST={{ .Address }}
-DB_PORT={{ .Port }}
-{{ end }}
+DB_HOST=172.17.0.1
+DB_PORT=25432
 DB_NAME=vexa
 DB_USER=postgres
 DB_PASSWORD=postgres
-{{ range service "redis" }}
-REDIS_HOST={{ .Address }}
-REDIS_PORT={{ .Port }}
-{{ end }}
+REDIS_HOST={{ with service "redis" }}{{ with index . 0 }}{{ .Address }}{{ end }}{{ else }}172.17.0.1{{ end }}
+REDIS_PORT={{ with service "redis" }}{{ with index . 0 }}{{ .Port }}{{ end }}{{ else }}31008{{ end }}
 LOG_LEVEL=DEBUG
 ADMIN_API_TOKEN=your-super-secret-token
 EOH
