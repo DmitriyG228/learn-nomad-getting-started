@@ -100,22 +100,40 @@ This roadmap is an executable plan to move the `docker-compose.yml` services to 
 **Phase 1.5 Status (2025-06-19):**
 - **COMPLETED ✅:** Service refactoring is complete and validated under `docker-compose`. The final validation step (local Nomad job) was **skipped** due to a persistent, unresolvable issue with the Nomad Docker driver attempting to pull local-only images. The core objective of environment abstraction is met. We will proceed, validating Nomad connectivity in the next phase with images from a proper registry.
 
-## Phase 2 (New) — Local Orchestration with Nomad (In Progress ⏳)
+## Phase 2 (New) — Local Orchestration with Nomad (In Progress ⏳ - 2/8 services complete)
 • **Objective:** Translate the entire `docker-compose.yml` into a set of Nomad job files that run locally, one by one, until the full stack is operational on Nomad.
-• **Prerequisites (Completed):**
-  - Docker-Compose stack is healthy and smoke-tested.
-  - `bot-manager` has been refactored with a pluggable orchestrator.
 • **Implementation Plan (Service Migration Checklist):**
-  - [ ] **`vexa-bot.nomad`**: Create a parameterized batch job for on-demand bot instances.
-  - [ ] **`nomad.py` driver**: Complete the Nomad orchestrator driver (`stop`, `status`, `verify` functions).
-  - [ ] **`redis.nomad`**: Run Redis as a system job.
-  - [ ] **`admin-api.nomad`**: Convert the Admin API service.
+  - [x] **Pre-flight Check: Nomad Client Prerequisites**
+    - [x] Consul agent is installed and running *before* Nomad agent.
+    - [x] CNI reference plugins (>=v0.4.0) are installed in `/opt/cni/bin`.
+    - [x] `nomad node status -verbose` confirms `consul.connect = true` and `plugins.cni.version.bridge` present.
+  - [x] **`redis.nomad`**: Run Redis as a service. **(Completed)**
+  - [x] **`admin-api.nomad`**: Job starts successfully; `/health` endpoint fix pending.
   - [ ] **`transcription-collector.nomad`**: Convert the Transcription Collector service.
-  - [ ] **`bot-manager.nomad`**: Convert the Bot Manager service.
-  - [ ] **`whisperlive-cpu.nomad`**: Convert the WhisperLive CPU service.
   - [ ] **`api-gateway.nomad`**: Convert the API Gateway service.
-  - [ ] **`traefik.nomad`**: Convert the Traefik ingress service.
+  - [ ] **`bot-manager.nomad`**: Convert the Bot Manager service.
+  - [ ] **`vexa-bot.nomad`**: Parameterized batch job.  
+  - [ ] **`whisperlive-cpu.nomad`**: WhisperLive CPU variant.
+  - [ ] **`traefik.nomad`**: Traefik ingress.
+  - [ ] **`nomad.py` driver**: Finish orchestrator driver.
+  - [ ] **Dev-cluster helper script** (`scripts/dev-cluster.sh`) to start/stop Consul & Nomad deterministically.
 • **Validation:** `nomad status` shows all jobs `running`; the application is fully functional locally using the Nomad orchestrator. The same smoke test suite used for Docker Compose passes.
+
+**Phase 2 Status (2025-06-20):**
+- **COMPLETED ✅:** `redis.nomad.hcl` is running successfully on the local Nomad agent.
+- **COMPLETED ✅:** `admin-api.nomad.hcl` is running successfully, healthchecks passing, service registered in Consul.
+- **LESSON LEARNED (Consul):** Initial deployment failed due to a missing Consul agent. The Nomad agent requires a running Consul agent to be present *at startup* to enable service discovery features. The resolution was to:
+    1. Install Consul using the official HashiCorp `apt` repository to ensure it's in the system `PATH`.
+    2. Strictly adhere to a startup order: `consul agent -dev` first, then `nomad agent -dev`.
+    3. Use the `-consul-address` flag on the Nomad agent for explicit configuration.
+- **LESSON LEARNED (CNI):** Job placement failed with a `Constraint` error for `attr.plugins.cni.version.bridge`. This is because any job with `network { mode = "bridge" }` requires the CNI reference plugins to be installed on the Nomad client node. This is a one-time setup task per client.
+- This confirms that our local Nomad+Consul dev environment is now correctly configured for service discovery.
+- **LESSON LEARNED (External Service IP):** Consul external-service definitions must reference the **actual** container IP on the Compose network (`172.21.0.0/16`), *not* `docker0`.  IP drift breaks template rendering and cascades into task failure. Prefer host-port mapping or dynamic registration to avoid hard-coding.
+- **LESSON LEARNED (Docker Image Tags):** Nomad's Docker driver **always** attempts to pull images with the `:latest` tag, regardless of the `force_pull = false` setting. For local development images, use a specific tag (e.g., `:dev`) to prevent registry pulls and use locally built images.
+- **LESSON LEARNED (Health Checks):** Service health check paths must match actual API endpoints. The admin-api service responds on `/` but not `/health`. Always verify endpoint availability before configuring service checks.
+- **TEMPLATE SYNTAX FIX:** Corrected Nomad template syntax from `| attr "address"` to `.Address` for accessing Consul service attributes.
+- **CURRENT SERVICES:** Both `redis` and `admin-api` are running successfully with proper service discovery integration.
+- **NEXT ACTION:** Continue with `transcription-collector.nomad.hcl` migration and create deterministic dev cluster startup script.
 
 ## Phase 3 (New) — Advanced Local Simulation
 • **Objective:** Implement and validate production-like features (load balancing, autoscaling) on the local Nomad cluster.
