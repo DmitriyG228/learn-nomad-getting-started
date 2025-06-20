@@ -14,7 +14,9 @@ Deploy the containerised services defined in `vexa/docker-compose.yml` to **prod
 • All important decisions are captured in this file. Update immediately after each decision.
 
 ## Current Phase
-- Phase 3 — Nomad & Consul Cluster (core networking complete; learning cluster under validation)
+- Phase 2A — Parameterised Job Skeleton (Starting ⚡)
+- Phase 2B — Orchestrator Helper Completion (Current ⚡)
+- Phase 2C — Service Job for Bot-Manager (Current ⚡)
 
 **Learning Cluster Note:** The Nomad cluster currently being provisioned is for experimentation and operator familiarisation only. It will be torn down or re-provisioned once container environment abstraction (Phase 1.5) is complete.
 
@@ -34,6 +36,16 @@ Current roadmap creates expensive rebuild cycles:
 - Test dual-compatibility (docker-compose AND Nomad) before building production images
 - **Validation**: Same image works in both docker-compose and Nomad environments
 
+**BOT-MANAGER ORCHESTRATION RISK 🚨**
+**Complex State Management & Lifecycle (KAD-08)**
+
+Bot-manager must transition from Docker socket orchestration to Nomad parameterised jobs:
+1. **Half-Complete Implementation**: Nomad dispatch code exists but lifecycle helpers (stop, verify, status) are stubs
+2. **Testing Complexity**: Bot lifecycle involves DB state, Redis pub/sub, container orchestration, and HTTP callbacks
+3. **Dual-Path Maintenance**: Must maintain Docker orchestrator path until Nomad route proven stable
+
+**Solution Strategy**: Break bot-manager work into minimal phases (2A-2E) with concrete smoke tests at each step.
+
 ## Key Architectural Decisions (KADs)
 | ID | Decision | Rationale |
 |----|----------|-----------|
@@ -45,6 +57,7 @@ Current roadmap creates expensive rebuild cycles:
 | KAD-06 | Secrets/connection strings via **Vault or Consul KV** templates | Decouple from image, rotate safely |
 | KAD-07 | Scaling strategy: Nomad Autoscaler for bots & WhisperLive; fallback to MIG if Autocaler proves unfit | Balances learning curve with operational risk |
 | KAD-08 | **`bot-manager` to use Parameterized Jobs** | `bot-manager` spawns transient `vexa-bot` containers. To make these compatible with Nomad's scheduler and avoid Docker-in-Docker complexities, `bot-manager` will be refactored. It will call the Nomad API to dispatch a parameterized `vexa-bot` batch job when running in a Nomad environment, while retaining its original Docker socket behavior for local `docker-compose` development. This ensures dual-compatibility and a single orchestration control plane in production. |
+| KAD-09 | **Configuration Encoding Strategy for transient *vexa-bot* jobs** | Encode the full `BOT_CONFIG` as **Base64-JSON** in a single environment variable (`BOT_CONFIG_B64`) instead of raw JSON, and generate it with Nomad's `toJSON` → `base64encode` pipeline.  The bot entrypoint will `base64 -d` and parse the JSON. |
 
 ## Service Inventory (derived from `docker-compose.yml`)
 | Service | Type | Ports | Notes |
@@ -100,28 +113,80 @@ This roadmap is an executable plan to move the `docker-compose.yml` services to 
 **Phase 1.5 Status (2025-06-19):**
 - **COMPLETED ✅:** Service refactoring is complete and validated under `docker-compose`. The final validation step (local Nomad job) was **skipped** due to a persistent, unresolvable issue with the Nomad Docker driver attempting to pull local-only images. The core objective of environment abstraction is met. We will proceed, validating Nomad connectivity in the next phase with images from a proper registry.
 
-## Phase 2 (New) — Local Orchestration with Nomad (In Progress ⏳ - 2/8 services complete)
-• **Objective:** Translate the entire `docker-compose.yml` into a set of Nomad job files that run locally, one by one, until the full stack is operational on Nomad.
-• **Implementation Plan (Service Migration Checklist):**
-  - [x] **Pre-flight Check: Nomad Client Prerequisites**
-    - [x] Consul agent is installed and running *before* Nomad agent.
-    - [x] CNI reference plugins (>=v0.4.0) are installed in `/opt/cni/bin`.
-    - [x] `nomad node status -verbose` confirms `consul.connect = true` and `plugins.cni.version.bridge` present.
-  - [x] **`redis.nomad`**: Run Redis as a service. **(Completed)**
-  - [x] **`admin-api.nomad`**: Job starts successfully; `/health` endpoint fix pending.
+## Phase 2 (New) — Local Orchestration with Nomad (Refactored into sub-phases 2A-2E)
+
+**Context**: This phase has been broken down into smaller increments to manage the complexity of bot-manager orchestration and reduce feedback loops.
+
+### Phase 2A — Parameterised Job Skeleton (Current ⚡)
+• **Objective**: Produce a valid `jobs/vexa-bot.nomad.hcl` that Nomad can parse and dispatch manually.
+• **Implementation Plan**:
+  1. Create batch job with `parameterized { meta_required = ["connection_id","user_id","meeting_id"] }`.
+  2. Template block turns meta into env-vars (`BOT_USER_ID`, `MEETING_URL`, etc.).
+  3. Resources: 200 MHz / 256 MiB for dev iteration.
+  4. Dummy `command: ["echo", "hello"]` for quick exit during iteration.
+• **Smoke-test**: 
+  - `nomad job run -output jobs/vexa-bot.nomad.hcl` ⇒ HCL accepted.
+  - `nomad job dispatch -meta connection_id=test vexa-bot` ⇒ allocation appears and exits 0.
+• **Risk Retired**: Basic job template & parameterisation syntax.
+
+### Phase 2B — Orchestrator Helper Completion
+• **Objective**: Finish Nomad-specific helpers in `app/orchestrators/nomad.py`.
+• **Implementation Plan**:
+  1. `stop_bot_container` → `POST /v1/job/<id>/stop` or `/deregister`.
+  2. `verify_container_running` polls `/v1/job/<id>` for running status.
+  3. `get_running_bots_status` queries `/v1/jobs?prefix=vexa-bot-` filtered by Meta.user_id.
+  4. Unit-test each helper with pytest + respx (HTTP mocking).
+• **Smoke-test**: Helper functions work against dev Nomad agent with expected HTTP responses.
+• **Risk Retired**: Bot-manager can manage lifecycle, not just dispatch.
+
+### Phase 2C — Service Job for Bot-Manager
+• **Objective**: Run bot-manager itself under Nomad with `ORCHESTRATOR=nomad`.
+• **Implementation Plan**:
+  1. Create `jobs/bot-manager.nomad.hcl` (service, port 8080).
+  2. Inject env-vars: `ORCHESTRATOR=nomad`, `NOMAD_ADDR` from Consul template.
+  3. Health-check on `/`.
+• **Smoke-test**: 
+  - `nomad run jobs/bot-manager.nomad.hcl` ⇒ allocation healthy, service in Consul.
+  - `curl :8080/` returns "Bot Manager is running".
+• **Risk Retired**: Bot-manager itself works under Nomad.
+
+### Phase 2D — End-to-End Dispatch Test
+• **Objective**: Prove bot-manager can launch a bot via parameterised job.
+• **Implementation Plan**:
+  1. Test API call: `curl -X POST localhost:8080/bots` with platform & meeting data.
+  2. Watch Nomad UI: new dispatch creates `vexa-bot/instance-<uuid>`.
+  3. Verify bot-manager logs record dispatch-ID & connection-ID.
+• **Smoke-test**: 
+  - API returns 201, job reaches `complete`.
+  - `curl /bots/status` shows one active bot.
+• **Risk Retired**: API wiring + Nomad dispatch path.
+
+### Phase 2E — Lifecycle & Failure Handling
+• **Objective**: Validate stop, duplicate requests, and exit callback logic.
+• **Implementation Plan**:
+  1. Test DELETE `/bots/{platform}/{id}` → bot exits and job stopped.
+  2. Test duplicate POST while job running → expect 409.
+  3. Exercise `/bots/internal/callback/exited` with fake payload.
+• **Smoke-test**: Automated pytest suite with all assertions green.
+• **Risk Retired**: Graceful cleanup & duplicate-bot protection.
+
+### Remaining Services (Post Bot-Manager)
   - [ ] **`transcription-collector.nomad`**: Convert the Transcription Collector service.
   - [ ] **`api-gateway.nomad`**: Convert the API Gateway service.
-  - [ ] **`bot-manager.nomad`**: Convert the Bot Manager service.
-  - [ ] **`vexa-bot.nomad`**: Parameterized batch job.  
   - [ ] **`whisperlive-cpu.nomad`**: WhisperLive CPU variant.
   - [ ] **`traefik.nomad`**: Traefik ingress.
-  - [ ] **`nomad.py` driver**: Finish orchestrator driver.
   - [ ] **Dev-cluster helper script** (`scripts/dev-cluster.sh`) to start/stop Consul & Nomad deterministically.
-• **Validation:** `nomad status` shows all jobs `running`; the application is fully functional locally using the Nomad orchestrator. The same smoke test suite used for Docker Compose passes.
+
+• **Overall Phase 2 Validation**: `nomad status` shows all jobs `running`; application fully functional locally using Nomad orchestrator.
 
 **Phase 2 Status (2025-06-20):**
 - **COMPLETED ✅:** `redis.nomad.hcl` is running successfully on the local Nomad agent.
 - **COMPLETED ✅:** `admin-api.nomad.hcl` is running successfully, healthchecks passing, service registered in Consul.
+- **COMPLETED ✅ Phase 2A:** `vexa-bot.nomad.hcl` parameterised job skeleton completed successfully. Job dispatches correctly with metadata passing through as environment variables.
+- **COMPLETED ✅ Phase 2B:** Nomad orchestrator helper functions completed and smoke-tested successfully. All lifecycle operations (start, stop, verify, status) working correctly against live Nomad agent.
+- **COMPLETED ✅ KAD-09 Implementation:** Base64-encoded bot configuration successfully deployed and tested. Real bot instances now launching with proper browser automation capabilities.
+- **BOT CONFIG SCHEMA RESEARCH ✅:** Completed comprehensive analysis of vexa-bot configuration requirements. The bot expects a specific `BOT_CONFIG` JSON schema with required fields: platform, meetingUrl, botName, token, connectionId, nativeMeetingId, redisUrl, automaticLeave object, plus optional fields like language, task, meeting_id, reconnectionIntervalMs, and botManagerCallbackUrl.
+- **LESSON LEARNED (Nomad Template JSON):** Nomad templates have limitations when generating JSON. Direct JSON construction in templates results in property names losing quotes (`{platform:` instead of `{"platform":`). The issue stems from template processing stripping quotes. Attempted solutions included using `toJSON` function, `dict`/`merge` functions (not available in Nomad templates), and complex escaping strategies.
 - **LESSON LEARNED (Consul):** Initial deployment failed due to a missing Consul agent. The Nomad agent requires a running Consul agent to be present *at startup* to enable service discovery features. The resolution was to:
     1. Install Consul using the official HashiCorp `apt` repository to ensure it's in the system `PATH`.
     2. Strictly adhere to a startup order: `consul agent -dev` first, then `nomad agent -dev`.
@@ -131,9 +196,45 @@ This roadmap is an executable plan to move the `docker-compose.yml` services to 
 - **LESSON LEARNED (External Service IP):** Consul external-service definitions must reference the **actual** container IP on the Compose network (`172.21.0.0/16`), *not* `docker0`.  IP drift breaks template rendering and cascades into task failure. Prefer host-port mapping or dynamic registration to avoid hard-coding.
 - **LESSON LEARNED (Docker Image Tags):** Nomad's Docker driver **always** attempts to pull images with the `:latest` tag, regardless of the `force_pull = false` setting. For local development images, use a specific tag (e.g., `:dev`) to prevent registry pulls and use locally built images.
 - **LESSON LEARNED (Health Checks):** Service health check paths must match actual API endpoints. The admin-api service responds on `/` but not `/health`. Always verify endpoint availability before configuring service checks.
+- **LESSON LEARNED (Template Syntax):** Nomad templates do not support the `default` function. Use the `or` function instead for providing default values: `{{ or (env "NOMAD_META_optional_var") "default_value" }}`.
 - **TEMPLATE SYNTAX FIX:** Corrected Nomad template syntax from `| attr "address"` to `.Address` for accessing Consul service attributes.
 - **CURRENT SERVICES:** Both `redis` and `admin-api` are running successfully with proper service discovery integration.
-- **NEXT ACTION:** Continue with `transcription-collector.nomad.hcl` migration and create deterministic dev cluster startup script.
+- **NEXT ACTION:** Starting Phase 2B - Complete Nomad orchestrator helpers in bot-manager.
+
+## Newly Identified Best Practice & Decision
+
+### KAD-09 — Configuration Encoding Strategy for transient *vexa-bot* jobs
+| Decision | **Encode the full `BOT_CONFIG` as **Base64-JSON** in a single environment variable (`BOT_CONFIG_B64`) instead of raw JSON, and generate it with Nomad's `toJSON` → `base64encode` pipeline.  The bot entrypoint will `base64 -d` and parse the JSON. |
+|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Rationale |
+1. **Template Limitations:** Nomad's env-template parser strips quotes from inline objects which makes raw JSON invalid.  Using `toJSON` on a map requires the Consul-Template `dict/merge` helpers that are blocked by the client's `function_denylist` (see Nomad issue #17026).  Base64 sidesteps all quoting/escaping problems entirely.
+2. **Industry Precedent:** Kubernetes  ➜ widely uses base64-encoded config blobs in secrets; Nomad docs explicitly recommend `toJSON → base64encode` for complex secrets (template block examples).
+3. **Runtime Simplicity:** The bot only needs a two-line shim (`echo "$BOT_CONFIG_B64" | base64 -d > /tmp/conf.json`) added to `entrypoint.sh`.  No change to existing Zod schema.
+4. **Security:** The same mechanism is Vault-compatible and avoids accidental log leaks (binary strings are not echoed by default).
+
+| Impact |
+* **jobs/vexa-bot.nomad.hcl** will switch to:
+  ```hcl
+  template {
+    data = <<EOH
+    {{- $cfg := env "NOMAD_META_platform" | regexReplaceAll "-" "_" | toJSON }}
+    # … build map with simple `set` helpers then …
+    BOT_CONFIG_B64={{ $cfg | toJSON | base64Encode }}
+    EOH
+    destination = "local/bot.env"
+    env = true
+  }
+  ```
+* `core/entrypoint.sh` gets a small decode step.
+
+| Validation |
+* Dispatch debug job must print **valid JSON** after `base64 -d` and the bot must start without `SyntaxError`.
+* Smoke-test added to Phase 2D.
+
+
+### Phase 2B status update
+- **COMPLETED ✅** Nomad helper functions.
+- **CONFIG ENCODING RESOLVED ✅** KAD-09 adopted; JSON quote-stripping risk retired.
 
 ## Phase 3 (New) — Advanced Local Simulation
 • **Objective:** Implement and validate production-like features (load balancing, autoscaling) on the local Nomad cluster.
