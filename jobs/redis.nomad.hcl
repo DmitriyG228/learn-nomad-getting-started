@@ -6,19 +6,18 @@ job "redis" {
     count = 1
 
     network {
+      mode = "bridge"
       port "db" {
         to = 6379
       }
     }
 
-    # This block registers the Redis instance as a service in Consul,
-    # making it discoverable by other jobs. The service will be named "redis".
     service {
-      provider = "nomad"  # avoid Consul dependency during dev
+      provider = "nomad"
       name     = "redis"
       port     = "db"
+      address_mode = "alloc"
 
-      # Health check to ensure the service is actually running.
       check {
         type     = "tcp"
         interval = "10s"

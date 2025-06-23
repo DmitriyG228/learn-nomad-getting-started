@@ -27,13 +27,24 @@ job "bot-manager" {
       env {
         ORCHESTRATOR = "nomad"
         LOG_LEVEL = "DEBUG"
-        DEVICE_TYPE = "cpu"
-        NOMAD_ADDR = "http://172.17.0.1:4646"
+      }
+
+      # Wait for dependencies to be available
+      template {
+        data = <<EOH
+# This template ensures Redis and Postgres services are available
+{{ with nomadService "redis" }}{{ with index . 0 }}# Redis available at {{ .Address }}:{{ .Port }}{{ end }}{{ end }}
+# We are using external postgres, so we don't check for it here
+EOH
+        destination = "local/dependencies"
+        change_mode = "restart"
+        perms = "644"
       }
 
       # Template for database connection (using external postgres service)
       template {
         data = <<EOH
+# Fallback to external postgres (vexa-ext-postgres)
 DB_HOST=172.17.0.1
 DB_PORT=25432
 DB_NAME=vexa
@@ -44,12 +55,21 @@ EOH
         env         = true
       }
 
-      # Template for Redis connection (via Docker gateway from bridge network)
+      # Template for Redis connection using Nomad service discovery
       template {
         data = <<EOH
-REDIS_URL=redis://172.17.0.1:25600/0
+{{ with nomadService "redis" }}{{ with index . 0 }}REDIS_URL=redis://{{ .Address }}:{{ .Port }}/0{{ end }}{{ end }}
 EOH
         destination = "local/redis.env"
+        env         = true
+      }
+
+      # Template for Nomad API access from bridge network
+      template {
+        data = <<EOH
+NOMAD_ADDR=http://{{ env "attr.unique.network.ip-address" }}:4646
+EOH
+        destination = "local/nomad.env"
         env         = true
       }
 
