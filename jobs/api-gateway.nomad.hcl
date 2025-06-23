@@ -8,6 +8,7 @@ job "api-gateway" {
     network {
       mode = "bridge"
       port "http" {
+        static = 8926  # Fixed port for stable access
         to = 8000
       }
     }
@@ -19,7 +20,7 @@ job "api-gateway" {
 
       check {
         type     = "http"
-        path     = "/health"
+        path     = "/"
         interval = "30s"
         timeout  = "5s"
       }
