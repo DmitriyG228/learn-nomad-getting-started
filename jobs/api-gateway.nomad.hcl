@@ -30,7 +30,7 @@ job "api-gateway" {
       driver = "docker"
 
       config {
-        image = "services/api-gateway:dev"
+        image = "vexaai/api-gateway:dev"
         ports = ["http"]
         force_pull = false
       }

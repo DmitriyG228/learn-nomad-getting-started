@@ -17,7 +17,7 @@ job "bot-manager" {
       driver = "docker"
       
       config {
-        image = "services/bot-manager:dev"
+        image = "vexaai/bot-manager:dev"
         ports = ["http"]
         force_pull = false  # Use local image, don't try to pull from registry
         # Use container default port (8080) with bridge networking
@@ -61,15 +61,6 @@ EOH
 {{ with nomadService "redis" }}{{ with index . 0 }}REDIS_URL=redis://{{ .Address }}:{{ .Port }}/0{{ end }}{{ end }}
 EOH
         destination = "local/redis.env"
-        env         = true
-      }
-
-      # Template for Nomad API access from bridge network
-      template {
-        data = <<EOH
-NOMAD_ADDR=http://{{ env "attr.unique.network.ip-address" }}:4646
-EOH
-        destination = "local/nomad.env"
         env         = true
       }
 

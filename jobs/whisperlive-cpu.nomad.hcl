@@ -33,7 +33,7 @@ job "whisperlive-cpu" {
       driver = "docker"
 
       config {
-        image = "services/whisperlive:cpu-dev"
+        image = "vexaai/whisperlive:cpu-dev"
         ports = ["ws", "health"]
         force_pull = false
 

@@ -29,7 +29,7 @@ job "transcription-collector" {
       driver = "docker"
 
       config {
-        image = "services/transcription-collector:dev"
+        image = "vexaai/transcription-collector:dev"
         ports = ["http"]
         force_pull = false
 

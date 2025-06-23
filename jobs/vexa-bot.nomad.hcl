@@ -32,7 +32,7 @@ job "vexa-bot" {
       
       config {
         # Use the freshly built dev vexa-bot image with browser automation
-        image = "services/vexa-bot:dev"
+        image = "vexaai/vexa-bot:dev"
         force_pull = false
       }
 

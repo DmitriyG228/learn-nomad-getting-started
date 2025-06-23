@@ -29,7 +29,7 @@ job "admin-api" {
       driver = "docker"
 
       config {
-        image = "services/admin-api:dev" # Using 'dev' tag instead of 'latest' to avoid forced pulls
+        image = "vexaai/admin-api:dev" # Using 'dev' tag instead of 'latest' to avoid forced pulls
         ports = ["http"]
         force_pull = false  # Use local image, don't try to pull from registry
       }
@@ -47,7 +47,7 @@ DB_PASSWORD=postgres
 {{ with nomadService "redis" }}{{ with index . 0 }}REDIS_HOST={{ .Address }}
 REDIS_PORT={{ .Port }}{{ end }}{{ end }}
 LOG_LEVEL=DEBUG
-ADMIN_API_TOKEN=your-super-secret-token
+ADMIN_API_TOKEN=vexa-admin-secret-2025
 EOH
         destination = "secrets/app.env"
         env         = true

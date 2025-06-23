@@ -39,7 +39,7 @@ job "whisperlive-gpu" {
       driver = "docker"
 
       config {
-        image = "services/whisperlive:gpu-dev"
+        image = "vexaai/whisperlive:gpu-dev"
         ports = ["ws", "health"]
         force_pull = false
 
