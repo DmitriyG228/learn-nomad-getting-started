@@ -26,7 +26,7 @@ if [ "$TARGET" = "gpu" ]; then
     nomad job run jobs/whisperlive-cpu.nomad.hcl
 else
     echo "💻 Deploying CPU WhisperLive services..."
-    nomad job run jobs/whisperlive-cpu.nomad.hcl
+nomad job run jobs/whisperlive-cpu.nomad.hcl
 fi
 
 # 4. Frontend/gateway last

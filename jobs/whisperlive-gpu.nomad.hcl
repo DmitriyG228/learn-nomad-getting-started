@@ -2,14 +2,14 @@ job "whisperlive-gpu" {
   datacenters = ["dc1"]
   type        = "service"
 
-  # Enable GPU constraint
+  # Target GPU-enabled nodes
   constraint {
-    attribute = "${attr.driver.docker.nvidia_driver_version}"
-    operator  = "is_set"
+    attribute = "${meta.gpu_enabled}"
+    value     = "true"
   }
 
   group "whisperlive" {
-    count = 3  # Match docker-compose replicas
+    count = 2  # Reduced count for testing
 
     network {
       mode = "bridge"
@@ -22,7 +22,7 @@ job "whisperlive-gpu" {
     }
 
     service {
-      name = "whisperlive"
+      name = "whisperlive-gpu"
       port = "ws"
       provider = "nomad"
       address_mode = "alloc"
@@ -42,15 +42,7 @@ job "whisperlive-gpu" {
       config {
         image = "vexaai/whisperlive:gpu-dev"
         ports = ["ws", "health"]
-        force_pull = false
-
-        # GPU configuration
-        devices = [
-          {
-            host_path      = "/dev/nvidia3"
-            container_path = "/dev/nvidia3"
-          }
-        ]
+        force_pull = true
 
         # Mount model cache
         volumes = [
@@ -82,8 +74,8 @@ REDIS_HOST={{ .Address }}
 REDIS_PORT={{ .Port }}{{ end }}{{ end }}
 REDIS_DB=0
 REDIS_STREAM_NAME=transcription_segments
-LANGUAGE_DETECTION_SEGMENTS=${LANGUAGE_DETECTION_SEGMENTS}
-VAD_FILTER_THRESHOLD=${VAD_FILTER_THRESHOLD}
+LANGUAGE_DETECTION_SEGMENTS=10
+VAD_FILTER_THRESHOLD=0.5
 DEVICE_TYPE=cuda
 # Nomad-specific environment for URL registration
 NOMAD_ALLOC_ID={{ env "NOMAD_ALLOC_ID" }}
@@ -93,18 +85,20 @@ EOH
         env         = true
       }
 
-      # GPU device requirement
+      # GPU device requirement using proper Nomad device syntax
       resources {
         cpu    = 2000  # MHz - GPU processing needs CPU support
         memory = 4096  # MB - Model loading requires significant memory
         
+        # Request NVIDIA GPU using device stanza
         device "nvidia/gpu" {
           count = 1
           
+          # Constraint for GPU memory (optional)
           constraint {
-            attribute = "${device.attr.compute_capability}"
+            attribute = "${device.attr.memory}"
             operator  = ">="
-            value     = "6.0"
+            value     = "4000 MiB"
           }
         }
       }
@@ -113,13 +107,20 @@ EOH
       template {
         data = <<EOH
 #!/bin/sh
-if [ "$DEVICE_TYPE" = "cuda" ]; then
-  echo 'INFO: DEVICE_TYPE is cuda, starting WhisperLive GPU service.'
-  exec python3 /app/run_server.py --port 9090 --backend faster_whisper -fw /root/.cache/huggingface/hub/models--Systran--faster-whisper-medium/snapshots/08e178d48790749d25932bbc082711ddcfdfbc4f
+echo "INFO: Starting WhisperLive GPU service"
+echo "INFO: NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES}"
+echo "INFO: DEVICE_TYPE=${DEVICE_TYPE}"
+
+# Check if GPU is available
+if command -v nvidia-smi >/dev/null 2>&1; then
+  echo "INFO: NVIDIA GPU detected:"
+  nvidia-smi -L
 else
-  echo "INFO: DEVICE_TYPE is not cuda (it is '$DEVICE_TYPE'), WhisperLive GPU service will not start. Sleeping indefinitely."
-  sleep infinity
+  echo "WARNING: nvidia-smi not found in container"
 fi
+
+# Start the service
+exec python3 /app/run_server.py --port 9090 --backend faster_whisper
 EOH
         destination = "local/start.sh"
         perms = "755"
