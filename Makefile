@@ -2,7 +2,7 @@
 # Complete workflow: Build -> Push -> Deploy with CPU/GPU target support
 
 TAG ?= dev
-PREFIX ?= services
+PREFIX := services
 DOCKERHUB_USER ?= vexaai
 TARGET ?= cpu
 
@@ -18,7 +18,7 @@ all: build push deploy
 build: build-all
 	@echo "✅ All images built and available locally for Nomad with tag $(TAG)"
 
-build-all: build-admin-api build-api-gateway build-vexa-bot build-bot-manager build-whisperlive-gpu build-whisperlive-cpu build-transcription-collector build-json-debug
+build-all: build-admin-api build-api-gateway build-vexa-bot build-bot-manager build-whisperlive-gpu build-whisperlive-cpu build-transcription-collector
 	@echo "✅ All services built successfully"
 
 build-admin-api:
@@ -48,10 +48,6 @@ build-whisperlive-cpu:
 build-transcription-collector:
 	@echo "📦 Building transcription-collector..."
 	docker build -t $(PREFIX)/transcription-collector:$(TAG) -f vexa/services/transcription-collector/Dockerfile vexa
-
-build-json-debug:
-	@echo "📦 Building json-debug..."
-	docker build -t $(PREFIX)/json-debug:$(TAG) debug-json
 
 # Push all images to Docker Hub
 push: build-all

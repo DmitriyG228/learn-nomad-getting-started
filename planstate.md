@@ -62,6 +62,70 @@ EOH
 -   **Resource Optimization**: Fine-tune CPU and memory resource requests and limits based on performance testing.
 -   **Autoscaling**: Implement and test autoscaling policies for all stateless services.
 
+### Phase 2 Addition: WhisperLive Horizontal Autoscaling ✅ (IMPLEMENTED)
+**Objective**: Automatically scale the number of WhisperLive instances according to live workload stored in Redis (`wl:rank`). Scale *out* when the average sessions per server exceeds **X** (default: `3`) and scale *in* when it drops below **Y** (default: `1`).
+
+**Implementation Completed**:
+1. **Metrics Exporter** (`scripts/whisperlive_metrics.sh` + `jobs/whisperlive-metrics-exporter.nomad.hcl`)
+   - ✅ Bash script exports Prometheus-formatted metrics from Redis `wl:rank`
+   - ✅ Deployed as HTTP service on port 9105 using `socat` + Alpine container
+   - ✅ Metrics exposed:
+     - `whisperlive_sessions_total{server="<url>"}` – sessions per server
+     - `whisperlive_sessions_average` – cluster average (key metric for scaling)
+     - `whisperlive_least_loaded_sessions{server="<url>"}` – for scale-in targeting
+     - `whisperlive_servers` – total server count
+
+2. **Prometheus Integration** (`jobs/prometheus.nomad.hcl`)
+   - ✅ Deployed Prometheus server on port 9090
+   - ✅ Configured to scrape WhisperLive metrics every 30s from port 9105
+   - ✅ Also scrapes Nomad and Consul metrics for infrastructure monitoring
+
+3. **Nomad Autoscaler** (`jobs/nomad-autoscaler.nomad.hcl`)
+   - ✅ Deployed open-source Nomad Autoscaler v0.4.0
+   - ✅ Configured with Prometheus APM plugin pointing to our Prometheus instance
+   - ✅ Horizontal scaling workers enabled, vertical scaling disabled
+   - ✅ Policy evaluation every 30s with configurable cooldown
+
+4. **Scaling Policies Added** (both `whisperlive-cpu.nomad.hcl` and `whisperlive-gpu.nomad.hcl`)
+   - ✅ CPU instances: min=1, max=10 with threshold strategy
+   - ✅ GPU instances: min=1, max=8 (GPU nodes more expensive) with threshold strategy
+   - ✅ Scale-out trigger: `whisperlive_sessions_average > 3`
+   - ✅ Scale-in trigger: `whisperlive_sessions_average < 1`
+   - ✅ Delta: ±1 instance per scaling event
+   - ✅ Cooldown: 2 minutes between scaling actions
+
+**Deployment & Testing Tools**:
+- ✅ `scripts/deploy-autoscaling.sh` – Automated deployment in correct order
+- ✅ `scripts/test-autoscaling.sh` – Load testing with bot dispatching
+- ✅ Integration with existing Redis-based WhisperLive routing (preserved)
+
+**Testing Status** (Smoke-Test Results):
+- ✅ **Metrics Exporter**: DEPLOYED & FUNCTIONAL
+  - Running at `http://192.168.1.4:9105/` 
+  - Returns valid Prometheus metrics format
+  - Currently shows: `whisperlive_servers 0` (expected - no active sessions)
+- ✅ **Scaling Policies**: ADDED to both WhisperLive CPU/GPU jobs
+- ✅ **Core Infrastructure**: WhisperLive GPU running, metrics collection working
+- ✅ **Nomad Autoscaler**: DEPLOYED & RUNNING ✅ **FULLY OPERATIONAL**
+  - **Fixed Issues**:
+    1. Removed Consul version constraint (Consul not running in environment)
+    2. Fixed invalid `evaluate_after` parameter in policy_eval block
+    3. Added proper node constraints to avoid GPU-only filtering
+    4. **FIXED CRITICAL PORT MISMATCH**: Corrected Prometheus address from port 9090 → 9091
+    5. **ELIMINATED HARDCODED NETWORKING**: Replaced static IPs with Nomad service discovery
+  - **Status**: Job v5 deployed successfully with cloud-portable service discovery
+  - **Workers**: 4 horizontal scaling workers active and monitoring for policy evaluations
+  - **Integration**: ✅ PROMETHEUS CONNECTION WORKING - Uses `nomadService "prometheus"` discovery
+  - **🚀 SCALING VERIFIED**: Successfully scaled GPU instances 2 → 3 when sessions average reached 5.00 (above threshold 3)
+- ✅ **Prometheus Service**: OPERATIONAL on port 9091 with proper service discovery
+- ✅ **Metrics Exporter**: CLOUD-READY - Removed hardcoded Redis IPs, uses `nomadService "redis"` discovery
+
+**Rationale Confirmed**:
+- ✅ Preserves Redis-based intelligent routing while adding cloud-native elasticity
+- ✅ Uses open-source components (no proprietary dependencies)
+- ✅ Scales based on actual workload (sessions) rather than generic CPU/memory
+- ✅ Configurable thresholds and cooldowns for production tuning
+
 ---
 
 ## Implemented Services Overview

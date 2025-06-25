@@ -11,6 +11,30 @@ job "whisperlive-gpu" {
   group "whisperlive" {
     count = 2  # Reduced count for testing
 
+    # Autoscaling policy for WhisperLive GPU instances  
+    scaling {
+      enabled = true
+      min     = 1
+      max     = 8  # GPU nodes are more expensive
+
+      policy {
+        evaluation_interval = "30s"
+        cooldown            = "2m"
+
+        check "wl_avg_sessions" {
+          source = "prometheus"
+          # When average > 3 → scale out, <1 → scale in
+          query  = "whisperlive_sessions_average"
+
+          strategy "threshold" {
+            upper_bound = 3
+            lower_bound = 1
+            delta       = 1   # change task group count by ±1
+          }
+        }
+      }
+    }
+
     network {
       mode = "bridge"
       port "ws" {
