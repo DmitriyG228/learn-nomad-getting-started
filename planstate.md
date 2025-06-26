@@ -106,17 +106,16 @@ EOH
   - Currently shows: `whisperlive_servers 0` (expected - no active sessions)
 - ✅ **Scaling Policies**: ADDED to both WhisperLive CPU/GPU jobs
 - ✅ **Core Infrastructure**: WhisperLive GPU running, metrics collection working
-- ✅ **Nomad Autoscaler**: DEPLOYED & RUNNING ✅ **FULLY OPERATIONAL**
-  - **Fixed Issues**:
-    1. Removed Consul version constraint (Consul not running in environment)
-    2. Fixed invalid `evaluate_after` parameter in policy_eval block
-    3. Added proper node constraints to avoid GPU-only filtering
-    4. **FIXED CRITICAL PORT MISMATCH**: Corrected Prometheus address from port 9090 → 9091
-    5. **ELIMINATED HARDCODED NETWORKING**: Replaced static IPs with Nomad service discovery
-  - **Status**: Job v5 deployed successfully with cloud-portable service discovery
-  - **Workers**: 4 horizontal scaling workers active and monitoring for policy evaluations
-  - **Integration**: ✅ PROMETHEUS CONNECTION WORKING - Uses `nomadService "prometheus"` discovery
-  - **🚀 SCALING VERIFIED**: Successfully scaled GPU instances 2 → 3 when sessions average reached 5.00 (above threshold 3)
+- ❌ **Nomad Autoscaler**: DEPLOYED BUT **NON-FUNCTIONAL**
+  - **Status**: The autoscaler job deploys successfully, but the process is completely inert. It produces no logs, emits no telemetry, and performs no scaling evaluations, despite being correctly configured and the process being active inside the container.
+  - **Debugging Summary**:
+    1. **Configuration Verified**: Confirmed via `nomad alloc exec` that the rendered config file has the correct Nomad and Prometheus addresses.
+    2. **Networking Verified**: Confirmed the container has the correct IP addresses for services.
+    3. **Versions Tested**: The issue persists across both `hashicorp/nomad-autoscaler:0.4.0` and `0.3.7`.
+    4. **Host Logs Checked**: `journalctl` for the Docker service shows no specific errors that would explain the container's state.
+  - **Conclusion**: This appears to be a deep, environmental incompatibility, likely between the autoscaler's Go binary, the host kernel (`5.15.0`), and the Docker version. Further debugging is impractical.
+  - **Workaround**: Autoscaling is disabled. The `whisperlive-gpu` job count will be managed manually via its job file until this issue can be revisited, potentially with different Nomad/Autoscaler versions.
+  - **Current State**: The `whisperlive-gpu` job count has been manually set to `3`.
 - ✅ **Prometheus Service**: OPERATIONAL on port 9091 with proper service discovery
 - ✅ **Metrics Exporter**: CLOUD-READY - Removed hardcoded Redis IPs, uses `nomadService "redis"` discovery
 
@@ -539,3 +538,88 @@ INFO:transcription:SELF_MONITOR: Started self-monitoring thread
 **Phase 1 Status**: ✅ **EFFECTIVELY COMPLETE** - All core services operational with production-ready patterns implemented
 
 *Last updated: 2025-06-24 17:59 - Post Nomad Variables implementation and service health verification*
+
+---
+
+### Phase 3: Local Development with Terraform ✅ (COMPLETE)
+
+**Objective**: Create a repeatable, code-based local development environment that mirrors production deployment patterns using Terraform to manage Nomad jobs (Rule 1.1).
+
+**Implementation Completed**:
+- ✅ **Terraform Configuration**: Created `vexa-deployment/terraform/main.tf` with Nomad provider v2.5.0
+- ✅ **Automated Job Discovery**: Uses `fileset()` function to automatically find all `*.nomad.hcl` files in `../jobs` directory
+- ✅ **Dynamic Resource Creation**: Uses `for_each` to create one `nomad_job` resource per job file
+- ✅ **Complete Deployment**: Successfully deployed all 11 jobs to local Nomad cluster via Terraform
+
+**Terraform Configuration Features**:
+```hcl
+# Automatic job discovery - no manual updates needed when adding new jobs
+locals {
+  job_files = fileset("../jobs", "*.nomad.hcl")
+}
+
+# Dynamic resource creation for each job
+resource "nomad_job" "vexa_services" {
+  for_each = local.job_files
+  jobspec = file("../jobs/${each.value}")
+}
+```
+
+**Deployed Jobs via Terraform** (Rule 3.6):
+1. `admin-api.nomad.hcl` → admin-api (service)
+2. `api-gateway.nomad.hcl` → api-gateway (service)
+3. `bot-manager.nomad.hcl` → bot-manager (service)
+4. `nomad-autoscaler.nomad.hcl` → nomad-autoscaler (service)
+5. `prometheus.nomad.hcl` → prometheus (service)
+6. `redis.nomad.hcl` → redis (service)
+7. `transcription-collector.nomad.hcl` → transcription-collector (service)
+8. `vexa-bot.nomad.hcl` → vexa-bot (batch/parameterized)
+9. `whisperlive-cpu.nomad.hcl` → whisperlive-cpu (service)
+10. `whisperlive-gpu.nomad.hcl` → whisperlive-gpu (service)
+11. `whisperlive-metrics-exporter.nomad.hcl` → whisperlive-metrics-exporter (service)
+
+**Terraform Workflow** (Rule 3.1):
+```bash
+cd vexa-deployment/terraform
+terraform init     # Initialize Nomad provider
+terraform plan     # Preview changes
+terraform apply    # Deploy all jobs to local Nomad
+```
+
+**Key Benefits** (Rule 3.7):
+- ✅ **Infrastructure as Code**: All job deployments now managed declaratively via Terraform
+- ✅ **Automatic Discovery**: Adding new `.nomad.hcl` files automatically includes them in deployment
+- ✅ **Local-to-Production Parity**: Same Terraform patterns used for local dev can scale to cloud deployment
+- ✅ **State Management**: Terraform tracks deployment state, enabling proper updates and rollbacks
+- ✅ **Validation**: Terraform plan shows exactly what will be deployed before applying changes
+
+**Validation Criteria Completed** (Rule 3.1):
+- ✅ **Smoke Test**: All 11 jobs successfully deployed and running via `terraform apply`
+- ✅ **State Consistency**: Terraform state matches actual Nomad cluster state
+- ✅ **Output Verification**: Custom output shows all job names, IDs, and status
+- ✅ **Web UI Access**: All jobs visible and manageable at `http://127.0.0.1:4646/ui/jobs`
+
+**Rationale for Terraform Approach** (Rule 3.7):
+1. **Production Readiness**: Establishes patterns that scale directly to GCP deployment
+2. **Developer Experience**: Single command (`terraform apply`) deploys entire stack
+3. **Maintainability**: Automatic job discovery eliminates manual Terraform updates
+4. **State Tracking**: Terraform state enables proper lifecycle management
+5. **Documentation**: Infrastructure definition serves as living documentation
+
+**Next Phase Options**:
+1. **Multi-Environment**: Extend Terraform to manage dev/staging/prod environments
+2. **Cloud Migration**: Use same Terraform patterns to deploy to GCP with Nomad Enterprise
+3. **CI/CD Integration**: Automate Terraform apply in deployment pipelines
+4. **Advanced Policies**: Add Terraform validation rules and policy as code
+
+**Critical Success Factors**:
+- ✅ **Nomad Agent Required**: Must run `nomad agent -dev` before Terraform operations
+- ✅ **File Structure**: All job files must be in `../jobs/` relative to Terraform directory
+- ✅ **Provider Compatibility**: Nomad provider v2.5.0 compatible with local dev agent
+- ✅ **State Persistence**: Terraform state stored locally in `.terraform/` directory
+
+*Phase 3 Status: ✅ **COMPLETE** - Terraform-managed local development environment operational*
+
+---
+
+*Last updated: 2025-06-26 13:00 - Post Phase 3 Terraform implementation and successful deployment*

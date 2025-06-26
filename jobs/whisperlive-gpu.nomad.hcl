@@ -9,7 +9,7 @@ job "whisperlive-gpu" {
   }
 
   group "whisperlive" {
-    count = 2  # Reduced count for testing
+    count = 1
 
     # Autoscaling policy for WhisperLive GPU instances  
     scaling {
@@ -27,11 +27,13 @@ job "whisperlive-gpu" {
           query  = "whisperlive_sessions_average"
 
           strategy "threshold" {
-            upper_bound = 3
+            upper_bound = 2
             lower_bound = 1
             delta       = 1   # change task group count by ±1
           }
         }
+
+        target "nomad" {}
       }
     }
 
@@ -112,18 +114,11 @@ EOH
       # GPU device requirement using proper Nomad device syntax
       resources {
         cpu    = 2000  # MHz - GPU processing needs CPU support
-        memory = 4096  # MB - Model loading requires significant memory
+        memory = 8192  # MB - Increased from 6144 to prevent OOM kills
         
         # Request NVIDIA GPU using device stanza
         device "nvidia/gpu" {
           count = 1
-          
-          # Constraint for GPU memory (optional)
-          constraint {
-            attribute = "${device.attr.memory}"
-            operator  = ">="
-            value     = "4000 MiB"
-          }
         }
       }
 

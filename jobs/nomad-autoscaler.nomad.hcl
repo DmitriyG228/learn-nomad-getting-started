@@ -35,7 +35,7 @@ job "nomad-autoscaler" {
       driver = "docker"
 
       config {
-        image = "hashicorp/nomad-autoscaler:0.4.0"
+        image = "hashicorp/nomad-autoscaler:0.3.7"
         ports = ["http"]
 
         command = "nomad-autoscaler"
@@ -44,21 +44,21 @@ job "nomad-autoscaler" {
           "-config",
           "${NOMAD_TASK_DIR}/autoscaler.hcl",
           "-http-bind-address",
-          "0.0.0.0",
-          "-log-level",
-          "DEBUG"
+          "0.0.0.0"
         ]
       }
 
       template {
         destination = "${NOMAD_TASK_DIR}/autoscaler.hcl"
+        change_mode = "restart"
         data = <<EOH
 # Nomad Autoscaler Configuration
 log_level = "DEBUG"
+plugin_dir = "/plugins"
 
 nomad {
-  # Connect to local Nomad agent (portable across environments)
-  address = "http://127.0.0.1:4646"
+  # Use template to get the host's IP, not localhost.
+  address = "http://{{env "attr.unique.network.ip-address"}}:4646"
   namespace = "*"
 }
 
@@ -67,9 +67,18 @@ apm "prometheus" {
   driver = "prometheus"
   config = {
     # Use Nomad service discovery to find Prometheus
-{{ with nomadService "prometheus" }}{{ with index . 0 }}    address = "http://{{ .Address }}:{{ .Port }}"{{ end }}{{ else }}    # Fallback if Prometheus service not found
-    address = "http://127.0.0.1:9091"{{ end }}
+{{ with nomadService "prometheus" }}{{ with index . 0 }}    address = "http://{{ .Address }}:{{ .Port }}"{{ end }}{{ end }}
   }
+}
+
+# Register the threshold strategy plugin
+strategy "threshold" {
+  driver = "threshold"
+}
+
+# Register the nomad task group target plugin
+target "nomad" {
+  driver = "nomad-target"
 }
 
 policy_eval {
