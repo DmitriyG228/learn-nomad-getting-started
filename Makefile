@@ -23,31 +23,31 @@ build-all: build-admin-api build-api-gateway build-vexa-bot build-bot-manager bu
 
 build-admin-api:
 	@echo "📦 Building admin-api..."
-	docker build -t $(PREFIX)/admin-api:$(TAG) -f vexa/services/admin-api/Dockerfile vexa
+	docker build -t $(PREFIX)/admin-api:$(TAG) -f ../vexa/services/admin-api/Dockerfile ../vexa
 
 build-api-gateway:
 	@echo "📦 Building api-gateway..."
-	docker build -t $(PREFIX)/api-gateway:$(TAG) -f vexa/services/api-gateway/Dockerfile vexa
+	docker build -t $(PREFIX)/api-gateway:$(TAG) -f ../vexa/services/api-gateway/Dockerfile ../vexa
 
 build-vexa-bot:
 	@echo "📦 Building vexa-bot..."
-	docker build -t $(PREFIX)/vexa-bot:$(TAG) vexa/services/vexa-bot/core
+	docker build -t $(PREFIX)/vexa-bot:$(TAG) ../vexa/services/vexa-bot/core
 
 build-bot-manager:
 	@echo "📦 Building bot-manager..."
-	docker build -t $(PREFIX)/bot-manager:$(TAG) -f vexa/services/bot-manager/Dockerfile vexa
+	docker build -t $(PREFIX)/bot-manager:$(TAG) -f ../vexa/services/bot-manager/Dockerfile ../vexa
 
 build-whisperlive-gpu:
 	@echo "📦 Building WhisperLive GPU..."
-	docker build -t $(PREFIX)/whisperlive:gpu-$(TAG) -f vexa/services/WhisperLive/Dockerfile.project vexa
+	docker build -t $(PREFIX)/whisperlive:gpu-$(TAG) -f ../vexa/services/WhisperLive/Dockerfile.project ../vexa
 
 build-whisperlive-cpu:
 	@echo "📦 Building WhisperLive CPU..."
-	docker build -t $(PREFIX)/whisperlive:cpu-$(TAG) -f vexa/services/WhisperLive/Dockerfile.cpu vexa
+	docker build -t $(PREFIX)/whisperlive:cpu-$(TAG) -f ../vexa/services/WhisperLive/Dockerfile.cpu ../vexa
 
 build-transcription-collector:
 	@echo "📦 Building transcription-collector..."
-	docker build -t $(PREFIX)/transcription-collector:$(TAG) -f vexa/services/transcription-collector/Dockerfile vexa
+	docker build -t $(PREFIX)/transcription-collector:$(TAG) -f ../vexa/services/transcription-collector/Dockerfile ../vexa
 
 # Push all images to Docker Hub
 push: build-all
@@ -99,7 +99,7 @@ push-whisperlive-gpu:
 
 # Setup Nomad Variables from environment configuration
 setup-nomad-vars:
-	@echo "🔧 Setting up Nomad Variables from vexa/.env..."
+	@echo "🔧 Setting up Nomad Variables from ../vexa/.env..."
 	@./scripts/setup-nomad-variables.sh
 
 # Deploy with TARGET support (cpu/gpu for WhisperLive)
@@ -177,7 +177,7 @@ help:
 	@echo "  nomad-status      - Show status of all jobs"
 	@echo ""
 	@echo "Configuration:"
-	@echo "  setup-nomad-vars  - Setup Nomad Variables from vexa/.env"
+	@echo "  setup-nomad-vars  - Setup Nomad Variables from ../vexa/.env"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  show-images       - Show locally built images"

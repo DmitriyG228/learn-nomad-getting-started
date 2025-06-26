@@ -19,15 +19,20 @@ job "nomad-autoscaler" {
     }
 
     service {
-      name = "nomad-autoscaler"
-      port = "http"
+      name     = "nomad-autoscaler"
+      port     = "http"
       provider = "nomad"
-      
+
       check {
         type     = "http"
         path     = "/v1/health"
         interval = "10s"
         timeout  = "3s"
+        
+        check_restart {
+          limit = 3
+          grace = "30s"
+        }
       }
     }
 
@@ -35,43 +40,40 @@ job "nomad-autoscaler" {
       driver = "docker"
 
       config {
-        image = "hashicorp/nomad-autoscaler:0.3.7"
+        image = "hashicorp/nomad-autoscaler:0.4.1"
         ports = ["http"]
 
+        # Direct command execution, no shell wrapper
         command = "nomad-autoscaler"
         args = [
           "agent",
-          "-config",
-          "${NOMAD_TASK_DIR}/autoscaler.hcl",
-          "-http-bind-address",
-          "0.0.0.0"
+          "-config=/local/autoscaler.hcl",
+          "-http-bind-address=0.0.0.0",
+          "-http-bind-port=8080",
+          "-log-level=DEBUG"
         ]
       }
 
       template {
-        destination = "${NOMAD_TASK_DIR}/autoscaler.hcl"
+        destination = "local/autoscaler.hcl"
         change_mode = "restart"
-        data = <<EOH
+        data        = <<EOH
 # Nomad Autoscaler Configuration
 log_level = "DEBUG"
 plugin_dir = "/plugins"
 
 nomad {
-  # Use template to get the host's IP, not localhost.
   address = "http://{{env "attr.unique.network.ip-address"}}:4646"
   namespace = "*"
 }
 
-# Prometheus APM plugin for WhisperLive metrics
 apm "prometheus" {
   driver = "prometheus"
   config = {
-    # Use Nomad service discovery to find Prometheus
-{{ with nomadService "prometheus" }}{{ with index . 0 }}    address = "http://{{ .Address }}:{{ .Port }}"{{ end }}{{ end }}
+    address = "http://192.168.1.4:9091"
   }
 }
 
-# Register the threshold strategy plugin
 strategy "threshold" {
   driver = "threshold"
 }
@@ -81,24 +83,16 @@ target "nomad" {
   driver = "nomad-target"
 }
 
-policy_eval {
-  workers = {
-    # Only enable horizontal scaling workers
-    cluster    = 0
-    horizontal = 4
-    vertical   = 0  # Disable DAS (Dynamic Application Sizing)
-  }
-}
-
 telemetry {
   prometheus_metrics = true
+  disable_hostname = true
 }
 EOH
       }
 
       resources {
         cpu    = 500
-        memory = 256
+        memory = 512
       }
     }
   }

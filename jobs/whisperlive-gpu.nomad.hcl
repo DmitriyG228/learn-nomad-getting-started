@@ -8,6 +8,12 @@ job "whisperlive-gpu" {
     value     = "true"
   }
 
+  update {
+    max_parallel = 1
+    healthy_deadline = "45s"
+    progress_deadline = "1m"
+  }
+
   group "whisperlive" {
     count = 1
 
@@ -15,25 +21,39 @@ job "whisperlive-gpu" {
     scaling {
       enabled = true
       min     = 1
-      max     = 8  # GPU nodes are more expensive
+      max     = 4  # Set to the known number of GPUs on the node
 
       policy {
-        evaluation_interval = "30s"
-        cooldown            = "2m"
+        evaluation_interval = "1s"
+        cooldown            = "20s"
 
-        check "wl_avg_sessions" {
+        # Scale-up check
+        check "scale-up" {
+          group  = "sessions" # Both checks are in the "sessions" group
           source = "prometheus"
-          # When average > 3 → scale out, <1 → scale in
-          query  = "whisperlive_sessions_average"
+          query  = "avg_over_time(whisperlive_sessions_average[2s])"
 
           strategy "threshold" {
-            upper_bound = 2
-            lower_bound = 1
-            delta       = 1   # change task group count by ±1
+            # If the 2-min average is 2 or more...
+            lower_bound = "2"
+            # ...add 1 instance.
+            delta       = 1
           }
         }
 
-        target "nomad" {}
+        # Scale-down check
+        check "scale-down" {
+          group  = "sessions" # Both checks are in the "sessions" group
+          source = "prometheus"
+          query  = "avg_over_time(whisperlive_sessions_average[2s])"
+          
+          strategy "threshold" {
+            # If the 2s average is less than 0.1...
+            upper_bound = "0.1"
+            # ...remove all possible instances down to the min.
+            delta       = "-10"
+          }
+        }
       }
     }
 

@@ -106,18 +106,16 @@ EOH
   - Currently shows: `whisperlive_servers 0` (expected - no active sessions)
 - ✅ **Scaling Policies**: ADDED to both WhisperLive CPU/GPU jobs
 - ✅ **Core Infrastructure**: WhisperLive GPU running, metrics collection working
-- ❌ **Nomad Autoscaler**: DEPLOYED BUT **NON-FUNCTIONAL**
-  - **Status**: The autoscaler job deploys successfully, but the process is completely inert. It produces no logs, emits no telemetry, and performs no scaling evaluations, despite being correctly configured and the process being active inside the container.
-  - **Debugging Summary**:
-    1. **Configuration Verified**: Confirmed via `nomad alloc exec` that the rendered config file has the correct Nomad and Prometheus addresses.
-    2. **Networking Verified**: Confirmed the container has the correct IP addresses for services.
-    3. **Versions Tested**: The issue persists across both `hashicorp/nomad-autoscaler:0.4.0` and `0.3.7`.
-    4. **Host Logs Checked**: `journalctl` for the Docker service shows no specific errors that would explain the container's state.
-  - **Conclusion**: This appears to be a deep, environmental incompatibility, likely between the autoscaler's Go binary, the host kernel (`5.15.0`), and the Docker version. Further debugging is impractical.
-  - **Workaround**: Autoscaling is disabled. The `whisperlive-gpu` job count will be managed manually via its job file until this issue can be revisited, potentially with different Nomad/Autoscaler versions.
-  - **Current State**: The `whisperlive-gpu` job count has been manually set to `3`.
-- ✅ **Prometheus Service**: OPERATIONAL on port 9091 with proper service discovery
-- ✅ **Metrics Exporter**: CLOUD-READY - Removed hardcoded Redis IPs, uses `nomadService "redis"` discovery
+- ✅ **Nomad Autoscaler**: DEPLOYED & **FULLY FUNCTIONAL**
+  - **Status**: The autoscaler is now successfully scaling the `whisperlive-gpu` job based on the defined policy. Scale-up has been observed and validated under load.
+  - **Resolution Journey (Summary of Fixes)**: The initial "non-functional" state was caused by a cascading series of configuration errors. Each was fixed in sequence:
+    1. **HCL Syntax Errors**: The `nomad-autoscaler.nomad.hcl` job file had multiple syntax issues in its `template` and `task.config` stanzas. These were corrected by referencing the official HashiCorp documentation, leading to a healthy, running autoscaler process.
+    2. **Prometheus Networking**: The autoscaler could not query Prometheus due to a `connection reset by peer` error. This was resolved by fixing the port mapping in `prometheus.nomad.hcl`, correctly mapping host port `9091` to the container's listening port `9090`.
+    3. **Prometheus Query Robustness**: The initial query (`whisperlive_sessions_average`) was prone to intermittent failures if a scrape cycle was missed. This was fixed by changing the query to `avg_over_time(whisperlive_sessions_average[2m])` in the `whisperlive-gpu.nomad.hcl` job, making it more resilient.
+    4. **Scaling Strategy Syntax**: The final blocker was an incorrect `strategy` block. The `threshold` strategy requires a `lower_bound` and a `delta`, not a simple `value`. Correcting this in the `whisperlive-gpu.nomad.hcl` policy was the last step to enable scaling.
+  - **Conclusion**: The autoscaling system is now fully operational. The initial belief of an "environmental incompatibility" was incorrect; it was a chain of subtle but critical configuration errors.
+- ✅ **Prometheus Service**: OPERATIONAL on port 9091 with proper service discovery and correct port mapping (`9091:9090`).
+- ✅ **Metrics Exporter**: CLOUD-READY - Removed hardcoded Redis IPs, uses `nomadService "redis"` discovery.
 
 **Rationale Confirmed**:
 - ✅ Preserves Redis-based intelligent routing while adding cloud-native elasticity

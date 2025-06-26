@@ -8,6 +8,7 @@ job "prometheus" {
     network {
       port "prometheus_ui" {
         static = 9091
+        to = 9090
       }
     }
 
@@ -62,7 +63,7 @@ scrape_configs:
 
   # Scrape WhisperLive metrics from our custom exporter
   - job_name: 'whisperlive-metrics'
-    scrape_interval: 30s
+    scrape_interval: 2s
     static_configs:
       - targets: ['192.168.1.4:9105']
     metrics_path: '/metrics'

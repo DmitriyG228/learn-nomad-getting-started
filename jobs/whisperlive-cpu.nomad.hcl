@@ -3,27 +3,43 @@ job "whisperlive-cpu" {
   type        = "service"
 
   group "whisperlive-cpu" {
-    count = 2  # Match docker-compose CPU replicas
+    count = 0  # Match docker-compose CPU replicas
 
     # Autoscaling policy for WhisperLive CPU instances
     scaling {
       enabled = true
-      min     = 1
+      min     = 0
       max     = 10
 
       policy {
-        evaluation_interval = "30s"
+        evaluation_interval = "1s"
         cooldown            = "2m"
 
-        check "wl_avg_sessions" {
+        # Scale-up check
+        check "scale-up" {
+          group  = "sessions"  # Both checks are in the "sessions" group
           source = "prometheus"
-          # When average > 3 → scale out, <1 → scale in
-          query  = "whisperlive_sessions_average"
+          query  = "avg_over_time(whisperlive_sessions_average[2m])"
 
           strategy "threshold" {
-            upper_bound = 3
-            lower_bound = 1
-            delta       = 1   # change task group count by ±1
+            # If the 2-min average is 2 or more...
+            lower_bound = "2"
+            # ...add 1 instance.
+            delta       = 1
+          }
+        }
+
+        # Scale-down check
+        check "scale-down" {
+          group  = "sessions"  # Both checks are in the "sessions" group
+          source = "prometheus"
+          query  = "avg_over_time(whisperlive_sessions_average[2m])"
+          
+          strategy "threshold" {
+            # If the 2-min average is less than 1...
+            upper_bound = "1"
+            # ...remove 1 instance.
+            delta       = -1
           }
         }
       }
