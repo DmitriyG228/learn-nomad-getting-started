@@ -621,3 +621,90 @@ terraform apply    # Deploy all jobs to local Nomad
 ---
 
 *Last updated: 2025-06-26 13:00 - Post Phase 3 Terraform implementation and successful deployment*
+
+---
+
+## Critical Fix: Atomic WhisperLive Server Allocation ⚡ (IMPLEMENTED)
+
+**Objective**: Eliminate race conditions in bot-to-WhisperLive server allocation to prevent multiple bots from being assigned to the same under-loaded server simultaneously.
+
+### Problem Identified (Rule 2.2)
+The previous allocation mechanism had a critical race condition:
+
+1. **Bot Query**: Multiple bots simultaneously query `wl:rank` sorted set via `ZRANGE` to find the least loaded server
+2. **Race Window**: Between querying and server score updates, multiple bots could select the same "least loaded" server
+3. **Server Overload**: Multiple bots connecting to the same under-loaded server, causing uneven load distribution
+
+### Solution Implemented ✅
+**Atomic Redis Lua Script** that executes the entire allocation operation in a single, indivisible transaction:
+
+```lua
+-- Atomic server allocation script
+local rank_key = KEYS[1]
+local max_clients = tonumber(ARGV[1])
+
+-- Find server with lowest score
+local servers = redis.call('ZRANGE', rank_key, 0, 0, 'WITHSCORES')
+if #servers == 0 then
+    return nil  -- No servers available
+end
+
+local server_url = servers[1]
+local current_score = tonumber(servers[2])
+
+-- Check capacity and allocate atomically
+if current_score < max_clients then
+    redis.call('ZINCRBY', rank_key, 1, server_url)
+    return server_url
+else
+    return nil  -- Server at capacity
+end
+```
+
+### Implementation Details ✅
+1. **Modified `google.ts`**: Added `allocateServer()` and `deallocateServer()` functions using Lua scripts
+2. **Atomic Operations**: All find-and-increment operations now execute atomically via `redis.eval()`
+3. **Proper Cleanup**: Server slots are deallocated when bots disconnect
+4. **Capacity Limits**: Script respects max_clients=10 limit per server
+
+### Results ✅
+- **Eliminated race conditions**: Multiple bots can no longer select the same under-loaded server
+- **Perfect load balancing**: Each server gets assigned bots sequentially (scores: 1, 1, 1)
+- **Reliable failover**: Failed servers are removed and deallocated correctly
+
+---
+
+## 🚨 **CRITICAL BUG IDENTIFIED: WebSocket Retry Failure** (REQUIRES FIX)
+
+### Problem Description
+**Status**: Some bots successfully allocate servers via atomic Lua script but **fail to establish WebSocket connections**.
+
+### Symptoms Observed
+```
+Bot 1: ✅ Atomic allocation → ✅ WebSocket connection → ✅ Transcription working
+Bot 2: ✅ Atomic allocation → ❌ WebSocket retry fails silently → ❌ No transcription
+```
+
+### Technical Analysis
+1. **Successful Allocation**: `[Node.js] Allocated server: ws://172.21.0.7:9090/ws`
+2. **Retry Initiated**: `[Failover] Got next candidate: ws://172.21.0.7:9090/ws. Retrying in 1s.`
+3. **Missing Connection**: **No `WebSocket connection opened successfully` log appears**
+4. **Silent Failure**: The `setTimeout(() => connectToWhisperLive(nextUrl), 1000)` appears to not execute
+
+### Root Cause Hypothesis
+- **Browser JavaScript execution issue**: Timeout callback may not be firing in some browser contexts
+- **WebSocket silent failure**: Connection attempts may be failing without triggering `onerror` events
+- **Race condition in browser context**: Multiple async operations interfering with each other
+
+### Impact (Rule 4)
+- **Service Degradation**: ~50% of bot allocation attempts result in silent failures
+- **Resource Waste**: Servers are allocated in Redis but remain unused
+- **User Experience**: Meetings may have partial or no transcription coverage
+
+### Proposed Fix (Rule 2.2)
+1. **Add explicit logging** around WebSocket creation and timeout execution
+2. **Implement connection health checks** to detect silent failures
+3. **Add exponential backoff** for failed connection attempts
+4. **Enhanced error handling** for browser context execution
+
+*Investigation Required*: This critical bug needs immediate resolution to ensure reliable service operation.
