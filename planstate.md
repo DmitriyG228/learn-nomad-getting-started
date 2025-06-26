@@ -247,8 +247,7 @@ make gcr-tags SERVICE=vexa-bot
 
 **Why This Happened**:
 1. **Docker Namespace Confusion**: Image names like `services/vexa-bot:dev` resembled registry paths
-2. **Nomad Docker Driver Behavior**: Even with `force_pull = false`, Docker daemon attempted registry validation
-3. **Registry Precedence**: Docker prioritized potential remote registry over definitive local image
+2. **Nomad Docker Driver Behavior**: Even with `force_pull = false`, the Docker daemon attempted registry validation
 
 **Permanent Solution**: Migrated to Google Container Registry where:
 - ✅ **Unambiguous Image Names**: Full registry paths (`gcr.io/project/services/...`) eliminate confusion
@@ -539,172 +538,31 @@ INFO:transcription:SELF_MONITOR: Started self-monitoring thread
 
 ---
 
-### Phase 3: Local Development with Terraform ✅ (COMPLETE)
+### Phase 3: GCP Hybrid Cloud Deployment
 
-**Objective**: Create a repeatable, code-based local development environment that mirrors production deployment patterns using Terraform to manage Nomad jobs (Rule 1.1).
+**Objective**: Design and deploy a scalable, hybrid infrastructure on Google Cloud Platform (GCP) to run Vexa services, while maintaining the `whisperlive-gpu` service on-premise.
 
-**Implementation Completed**:
-- ✅ **Terraform Configuration**: Created `vexa-deployment/terraform/main.tf` with Nomad provider v2.5.0
-- ✅ **Automated Job Discovery**: Uses `fileset()` function to automatically find all `*.nomad.hcl` files in `../jobs` directory
-- ✅ **Dynamic Resource Creation**: Uses `for_each` to create one `nomad_job` resource per job file
-- ✅ **Complete Deployment**: Successfully deployed all 11 jobs to local Nomad cluster via Terraform
+### High-Level Design Decisions & Rationale (Rule 3.7)
 
-**Terraform Configuration Features**:
-```hcl
-# Automatic job discovery - no manual updates needed when adding new jobs
-locals {
-  job_files = fileset("../jobs", "*.nomad.hcl")
-}
+*   **Network Architecture**: A **Hub-and-Spoke model using a Shared VPC** will be implemented. A central "Connectivity" VPC in a dedicated hub project will connect to the on-premise network via an **HA VPN**. This follows Google's best practices for security and centralized control.
+*   **Nomad Cluster Topology**: The Nomad cluster will be segregated into two distinct groups of VMs, following HashiCorp's official reference architecture for production deployments (Rule 2.2).
+    1.  **Management Plane**: A small, highly-available cluster of 3 **`e2-medium`** VMs running in a static instance group. These will host the Nomad and Consul server agents. The `e2-medium` (1 vCPU, 4GB RAM) provides sufficient resources for management tasks with a good cost-performance ratio.
+    2.  **Application Plane (Vexa Bots)**: A **Managed Instance Group (MIG)** will be used to run the `vexa-bot` workloads. This provides autoscaling and high availability.
+*   **`vexa-bot` Sizing and Scaling Strategy**: After analyzing the application's requirements (250MHz CPU, 512MB RAM), the decision is to use a **"one bot per VM"** model.
+    *   **Machine Type**: **`e2-micro`** (0.25 vCPU, 1 GB RAM).
+    *   **Rationale (Rule 2.3 & 3.7)**: The `e2-micro` instance is a near-perfect fit for the bot's resource needs, providing the required CPU and a safe memory margin for the OS and agents. While a "multiple bots per VM" strategy was considered for resource density, the "one bot per VM" model was chosen for its overwhelming advantages in **simplicity and isolation**. The scaling logic is straightforward (one VM per meeting), and each bot process is fully isolated, preventing any single point of failure from impacting other bots. This aligns with our core principles of proceeding cautiously (Rule 2.1) and implementing in minimal, manageable phases (Rule 3.1). The operational simplicity is deemed more valuable than the potential minor cost savings of a more complex bin-packing approach.
 
-# Dynamic resource creation for each job
-resource "nomad_job" "vexa_services" {
-  for_each = local.job_files
-  jobspec = file("../jobs/${each.value}")
-}
-```
+### Implementation Plan (Phase 3.1)
 
-**Deployed Jobs via Terraform** (Rule 3.6):
-1. `admin-api.nomad.hcl` → admin-api (service)
-2. `api-gateway.nomad.hcl` → api-gateway (service)
-3. `bot-manager.nomad.hcl` → bot-manager (service)
-4. `nomad-autoscaler.nomad.hcl` → nomad-autoscaler (service)
-5. `prometheus.nomad.hcl` → prometheus (service)
-6. `redis.nomad.hcl` → redis (service)
-7. `transcription-collector.nomad.hcl` → transcription-collector (service)
-8. `vexa-bot.nomad.hcl` → vexa-bot (batch/parameterized)
-9. `whisperlive-cpu.nomad.hcl` → whisperlive-cpu (service)
-10. `whisperlive-gpu.nomad.hcl` → whisperlive-gpu (service)
-11. `whisperlive-metrics-exporter.nomad.hcl` → whisperlive-metrics-exporter (service)
-
-**Terraform Workflow** (Rule 3.1):
-```bash
-cd vexa-deployment/terraform
-terraform init     # Initialize Nomad provider
-terraform plan     # Preview changes
-terraform apply    # Deploy all jobs to local Nomad
-```
-
-**Key Benefits** (Rule 3.7):
-- ✅ **Infrastructure as Code**: All job deployments now managed declaratively via Terraform
-- ✅ **Automatic Discovery**: Adding new `.nomad.hcl` files automatically includes them in deployment
-- ✅ **Local-to-Production Parity**: Same Terraform patterns used for local dev can scale to cloud deployment
-- ✅ **State Management**: Terraform tracks deployment state, enabling proper updates and rollbacks
-- ✅ **Validation**: Terraform plan shows exactly what will be deployed before applying changes
-
-**Validation Criteria Completed** (Rule 3.1):
-- ✅ **Smoke Test**: All 11 jobs successfully deployed and running via `terraform apply`
-- ✅ **State Consistency**: Terraform state matches actual Nomad cluster state
-- ✅ **Output Verification**: Custom output shows all job names, IDs, and status
-- ✅ **Web UI Access**: All jobs visible and manageable at `http://127.0.0.1:4646/ui/jobs`
-
-**Rationale for Terraform Approach** (Rule 3.7):
-1. **Production Readiness**: Establishes patterns that scale directly to GCP deployment
-2. **Developer Experience**: Single command (`terraform apply`) deploys entire stack
-3. **Maintainability**: Automatic job discovery eliminates manual Terraform updates
-4. **State Tracking**: Terraform state enables proper lifecycle management
-5. **Documentation**: Infrastructure definition serves as living documentation
-
-**Next Phase Options**:
-1. **Multi-Environment**: Extend Terraform to manage dev/staging/prod environments
-2. **Cloud Migration**: Use same Terraform patterns to deploy to GCP with Nomad Enterprise
-3. **CI/CD Integration**: Automate Terraform apply in deployment pipelines
-4. **Advanced Policies**: Add Terraform validation rules and policy as code
-
-**Critical Success Factors**:
-- ✅ **Nomad Agent Required**: Must run `nomad agent -dev` before Terraform operations
-- ✅ **File Structure**: All job files must be in `../jobs/` relative to Terraform directory
-- ✅ **Provider Compatibility**: Nomad provider v2.5.0 compatible with local dev agent
-- ✅ **State Persistence**: Terraform state stored locally in `.terraform/` directory
-
-*Phase 3 Status: ✅ **COMPLETE** - Terraform-managed local development environment operational*
-
----
-
-*Last updated: 2025-06-26 13:00 - Post Phase 3 Terraform implementation and successful deployment*
-
----
-
-## Critical Fix: Atomic WhisperLive Server Allocation ⚡ (IMPLEMENTED)
-
-**Objective**: Eliminate race conditions in bot-to-WhisperLive server allocation to prevent multiple bots from being assigned to the same under-loaded server simultaneously.
-
-### Problem Identified (Rule 2.2)
-The previous allocation mechanism had a critical race condition:
-
-1. **Bot Query**: Multiple bots simultaneously query `wl:rank` sorted set via `ZRANGE` to find the least loaded server
-2. **Race Window**: Between querying and server score updates, multiple bots could select the same "least loaded" server
-3. **Server Overload**: Multiple bots connecting to the same under-loaded server, causing uneven load distribution
-
-### Solution Implemented ✅
-**Atomic Redis Lua Script** that executes the entire allocation operation in a single, indivisible transaction:
-
-```lua
--- Atomic server allocation script
-local rank_key = KEYS[1]
-local max_clients = tonumber(ARGV[1])
-
--- Find server with lowest score
-local servers = redis.call('ZRANGE', rank_key, 0, 0, 'WITHSCORES')
-if #servers == 0 then
-    return nil  -- No servers available
-end
-
-local server_url = servers[1]
-local current_score = tonumber(servers[2])
-
--- Check capacity and allocate atomically
-if current_score < max_clients then
-    redis.call('ZINCRBY', rank_key, 1, server_url)
-    return server_url
-else
-    return nil  -- Server at capacity
-end
-```
-
-### Implementation Details ✅
-1. **Modified `google.ts`**: Added `allocateServer()` and `deallocateServer()` functions using Lua scripts
-2. **Atomic Operations**: All find-and-increment operations now execute atomically via `redis.eval()`
-3. **Proper Cleanup**: Server slots are deallocated when bots disconnect
-4. **Capacity Limits**: Script respects max_clients=10 limit per server
-
-### Results ✅
-- **Eliminated race conditions**: Multiple bots can no longer select the same under-loaded server
-- **Perfect load balancing**: Each server gets assigned bots sequentially (scores: 1, 1, 1)
-- **Reliable failover**: Failed servers are removed and deallocated correctly
-
----
-
-## 🚨 **CRITICAL BUG IDENTIFIED: WebSocket Retry Failure** (REQUIRES FIX)
-
-### Problem Description
-**Status**: Some bots successfully allocate servers via atomic Lua script but **fail to establish WebSocket connections**.
-
-### Symptoms Observed
-```
-Bot 1: ✅ Atomic allocation → ✅ WebSocket connection → ✅ Transcription working
-Bot 2: ✅ Atomic allocation → ❌ WebSocket retry fails silently → ❌ No transcription
-```
-
-### Technical Analysis
-1. **Successful Allocation**: `[Node.js] Allocated server: ws://172.21.0.7:9090/ws`
-2. **Retry Initiated**: `[Failover] Got next candidate: ws://172.21.0.7:9090/ws. Retrying in 1s.`
-3. **Missing Connection**: **No `WebSocket connection opened successfully` log appears**
-4. **Silent Failure**: The `setTimeout(() => connectToWhisperLive(nextUrl), 1000)` appears to not execute
-
-### Root Cause Hypothesis
-- **Browser JavaScript execution issue**: Timeout callback may not be firing in some browser contexts
-- **WebSocket silent failure**: Connection attempts may be failing without triggering `onerror` events
-- **Race condition in browser context**: Multiple async operations interfering with each other
-
-### Impact (Rule 4)
-- **Service Degradation**: ~50% of bot allocation attempts result in silent failures
-- **Resource Waste**: Servers are allocated in Redis but remain unused
-- **User Experience**: Meetings may have partial or no transcription coverage
-
-### Proposed Fix (Rule 2.2)
-1. **Add explicit logging** around WebSocket creation and timeout execution
-2. **Implement connection health checks** to detect silent failures
-3. **Add exponential backoff** for failed connection attempts
-4. **Enhanced error handling** for browser context execution
-
-*Investigation Required*: This critical bug needs immediate resolution to ensure reliable service operation.
+1.  **Terraform Scaffolding**: Create the basic directory structure and configuration files for the new GCP infrastructure within the `@/terraform` directory.
+    *   `terraform/`
+        *   `gcp/`
+            *   `main.tf`
+            *   `variables.tf`
+            *   `network.tf` (for VPC, subnets, firewall rules, VPN)
+            *   `management.tf` (for Nomad/Consul server cluster)
+            *   `bots.tf` (for the vexa-bot MIG and instance template)
+2.  **VPC and VPN Setup**: Implement the hub-and-spoke network and the HA VPN connection.
+3.  **Management Plane Deployment**: Deploy the Nomad/Consul server cluster.
+4.  **Application Plane Deployment**: Deploy the `vexa-bot` MIG.
+5.  **Validation**: Run end-to-end smoke tests to ensure a bot can be scheduled on a GCP VM and successfully communicate with the on-premise `whisperlive` service.

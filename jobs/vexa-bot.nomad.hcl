@@ -101,8 +101,8 @@ EOH
 
       # Increased resources for browser automation and video processing
       resources {
-        cpu    = 1000 # MHz - browser automation is CPU intensive
-        memory = 2048 # MB - Chrome needs significant memory
+        cpu    = 250 # MHz - browser automation is CPU intensive
+        memory = 512 # MB - Chrome needs significant memory
       }
       
       # Restart policy for batch jobs
