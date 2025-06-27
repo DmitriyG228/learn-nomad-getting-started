@@ -12,6 +12,8 @@ resource "google_compute_instance_template" "core" {
   name_prefix  = "core-template-"
   machine_type = "e2-small"
   region       = var.gcp_region
+  
+  tags = ["core"]
 
   disk {
     source_image = "debian-cloud/debian-11"

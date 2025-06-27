@@ -27,14 +27,13 @@ resource "nomad_variable" "database" {
     port     = "5432"
     name     = google_sql_database.vexa.name
     user     = google_sql_user.postgres.name
-    password = random_password.db_pass.result
+    password = local.db_password
   }
   
   depends_on = [
     google_sql_database_instance.dev,
     google_sql_database.vexa,
-    google_sql_user.postgres,
-    random_password.db_pass
+    google_sql_user.postgres
   ]
 }
 

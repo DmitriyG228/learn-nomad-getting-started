@@ -6,10 +6,16 @@ resource "google_project_service" "sqladmin" {
   service = "sqladmin.googleapis.com"
 }
 
-# Random strong password for the postgres user (stored in Secret Manager)
+# Generate random password only if custom password is not provided
 resource "random_password" "db_pass" {
+  count   = var.db_password == null ? 1 : 0
   length  = 32
   special = true
+}
+
+# Use custom password if provided, otherwise use random password
+locals {
+  db_password = var.db_password != null ? var.db_password : random_password.db_pass[0].result
 }
 
 # Secret Manager secret holding the DB password
@@ -22,7 +28,7 @@ resource "google_secret_manager_secret" "db_pass" {
 
 resource "google_secret_manager_secret_version" "db_pass_ver" {
   secret      = google_secret_manager_secret.db_pass.id
-  secret_data = random_password.db_pass.result
+  secret_data = local.db_password
 }
 
 # Private IP range for Cloud SQL (one-time) – uses a /24 in 10.0.4.0/24
@@ -71,7 +77,7 @@ resource "google_sql_database" "vexa" {
 resource "google_sql_user" "postgres" {
   name     = "postgres"
   instance = google_sql_database_instance.dev.name
-  password = random_password.db_pass.result
+  password = local.db_password
 }
 
 # Output useful connection info

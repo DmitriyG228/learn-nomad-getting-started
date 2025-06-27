@@ -11,3 +11,10 @@ Vagrantfile
 ignore*
 *.token
 *.pem
+
+# Terraform credentials (never commit these!)
+*.auto.tfvars
+terraform.auto.tfvars
+secrets/
+.env
+.env.*

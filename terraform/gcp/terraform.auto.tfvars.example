@@ -1,0 +1,21 @@
+# Vexa GCP Deployment Credentials
+# ================================
+# 
+# This file contains sensitive credentials and tokens.
+# Copy this to terraform.auto.tfvars and fill in the real values.
+# Never commit terraform.auto.tfvars to version control!
+
+# GCP Project Configuration
+gcp_project_id = "your-gcp-project-id"
+gcp_region     = "us-central1"
+gcp_zone       = "us-central1-b"
+
+# Nomad Configuration  
+nomad_addr = "http://35.188.73.142:4646"
+
+# Application Secrets
+admin_api_token = "your-secure-admin-api-token-here"
+
+# Database Configuration (optional - leave empty to auto-generate)
+# If you provide a custom password, it will override the random generation
+# db_password = "your-custom-db-password-here" 

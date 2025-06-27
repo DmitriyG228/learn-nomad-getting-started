@@ -14,6 +14,7 @@ job "redis" {
     network {
       mode = "bridge"
       port "db" {
+        static = 6379  # Fixed port for stable access
         to = 6379
       }
     }

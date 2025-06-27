@@ -14,6 +14,7 @@ job "admin-api" {
     network {
       mode = "bridge"
       port "http" {
+        static = 8001  # Fixed port for stable access
         to = 8001
       }
     }

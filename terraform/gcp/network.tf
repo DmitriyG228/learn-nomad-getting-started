@@ -107,3 +107,51 @@ resource "google_compute_firewall" "allow-web-ui" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["management"]
 }
+
+# Firewall rule to allow API Gateway access
+resource "google_compute_firewall" "allow-api-gateway" {
+  name    = "${var.vpc_name}-allow-api-gateway"
+  network = google_compute_network.main.name
+  
+  allow {
+    protocol = "tcp"
+    ports    = [
+      "8926"  # API Gateway port
+    ]
+  }
+  
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["core"]
+}
+
+# Firewall rule to allow Redis access between core services
+resource "google_compute_firewall" "allow-redis" {
+  name    = "${var.vpc_name}-allow-redis"
+  network = google_compute_network.main.name
+  
+  allow {
+    protocol = "tcp"
+    ports    = [
+      "6379"  # Redis port
+    ]
+  }
+  
+  source_tags = ["core"]
+  target_tags = ["core"]
+}
+
+# Firewall rule to allow Admin API access between core services
+resource "google_compute_firewall" "allow-admin-api" {
+  name    = "${var.vpc_name}-allow-admin-api"
+  network = google_compute_network.main.name
+  
+  allow {
+    protocol = "tcp"
+    ports    = [
+      "8001"  # Admin API port
+    ]
+  }
+  
+  source_tags = ["core"]
+  target_tags = ["core"]
+}
