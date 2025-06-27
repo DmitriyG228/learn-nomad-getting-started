@@ -8,6 +8,7 @@ job "redis" {
     network {
       mode = "bridge"
       port "db" {
+        static = 6379
         to = 6379
       }
     }
@@ -16,7 +17,7 @@ job "redis" {
       provider = "nomad"
       name     = "redis"
       port     = "db"
-      address_mode = "alloc"
+      address_mode = "host"
 
       check {
         type     = "tcp"

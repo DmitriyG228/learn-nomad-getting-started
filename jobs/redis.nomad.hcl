@@ -23,7 +23,7 @@ job "redis" {
       provider = "nomad"
       name     = "redis"
       port     = "db"
-      address_mode = "alloc"
+      address_mode = "host"
 
       check {
         type     = "tcp"

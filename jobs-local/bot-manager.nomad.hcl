@@ -9,7 +9,8 @@ job "bot-manager" {
     network {
       mode = "bridge"
       port "http" {
-        to = 8080
+        to     = 8080
+        static = 8080
       }
     }
 
@@ -18,7 +19,7 @@ job "bot-manager" {
       provider = "nomad"
       name     = "bot-manager"
       port     = "http"
-      address_mode = "alloc"
+      address_mode = "host"
       
       check {
         type     = "http"
