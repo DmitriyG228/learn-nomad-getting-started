@@ -99,10 +99,10 @@ EOH
         env         = true
       }
 
-      # Increased resources for browser automation and video processing
+      # Increased resources for browser automation and video processing (2x boost)
       resources {
-        cpu    = 250 # MHz - browser automation is CPU intensive
-        memory = 512 # MB - Chrome needs significant memory
+        cpu    = 500 # MHz - browser automation is CPU intensive (2x: 250->500)
+        memory = 1024 # MB - Chrome needs significant memory (2x: 512->1024)
       }
       
       # Restart policy for batch jobs
