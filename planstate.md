@@ -483,7 +483,7 @@ ADMIN_API_TOKEN=admin_secret_token_123
 | **redis** | ✅ Running | Healthy | Port 6379, accepting connections |
 | **admin-api** | ✅ Running | ✅ HTTP 200 OK | Using Nomad Variables, responding to health checks |
 | **bot-manager** | ✅ Running | ✅ HTTP 200 OK | Connected to database via Nomad Variables |
-| **api-gateway** | ✅ Running | ✅ HTTP 200 OK | Routing requests successfully |
+| **api-gateway** | ✅ Running | ✅ HTTP 200 OK | Routing requests successfully, **Admin API token configured via Nomad Variables** |
 | **transcription-collector** | ✅ Running | ✅ HTTP 200 OK | Connected to database via Nomad Variables |
 | **whisperlive-cpu** | ✅ Running (2 instances) | ✅ HTTP 200 OK | Connected to Redis, auto-language detection active |
 | **whisperlive-gpu** | ❌ Pending | N/A | **Cannot place: No NVIDIA GPU driver available** |

@@ -36,25 +36,13 @@ job "api-gateway" {
         force_pull = false
       }
 
-      # Wait for backend services to be available
-      template {
-        data = <<EOH
-# This template ensures backend services are available
-{{ with nomadService "admin-api" }}{{ with index . 0 }}# Admin API available at {{ .Address }}:{{ .Port }}{{ end }}{{ end }}
-{{ with nomadService "bot-manager" }}{{ with index . 0 }}# Bot Manager available at {{ .Address }}:{{ .Port }}{{ end }}{{ end }}
-{{ with nomadService "transcription-collector" }}{{ with index . 0 }}# Transcription Collector available at {{ .Address }}:{{ .Port }}{{ end }}{{ end }}
-EOH
-        destination = "local/dependencies"
-        change_mode = "restart"
-        perms = "644"
-      }
-
-      # Service URLs configuration
+      # Service URLs configuration - NO FALLBACKS (Rule 5)
       template {
         data = <<EOH
 {{ with nomadService "admin-api" }}{{ with index . 0 }}ADMIN_API_URL=http://{{ .Address }}:{{ .Port }}{{ end }}{{ end }}
 {{ with nomadService "bot-manager" }}{{ with index . 0 }}BOT_MANAGER_URL=http://{{ .Address }}:{{ .Port }}{{ end }}{{ end }}
 {{ with nomadService "transcription-collector" }}{{ with index . 0 }}TRANSCRIPTION_COLLECTOR_URL=http://{{ .Address }}:{{ .Port }}{{ end }}{{ end }}
+{{ with nomadVar "secret/vexa/admin-api" }}ADMIN_API_TOKEN={{ .token }}{{ end }}
 LOG_LEVEL=DEBUG
 EOH
         destination = "local/services.env"
@@ -74,4 +62,4 @@ EOH
       }
     }
   }
-} 
+}

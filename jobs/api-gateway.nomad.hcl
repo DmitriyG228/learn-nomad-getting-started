@@ -61,6 +61,7 @@ EOH
 {{ with nomadService "admin-api" }}{{ with index . 0 }}ADMIN_API_URL=http://{{ .Address }}:{{ .Port }}{{ end }}{{ end }}
 {{ with nomadService "bot-manager" }}{{ with index . 0 }}BOT_MANAGER_URL=http://{{ .Address }}:{{ .Port }}{{ end }}{{ end }}
 {{ with nomadService "transcription-collector" }}{{ with index . 0 }}TRANSCRIPTION_COLLECTOR_URL=http://{{ .Address }}:{{ .Port }}{{ end }}{{ end }}
+{{ with nomadVar "secret/vexa/admin-api" }}ADMIN_API_TOKEN={{ .token }}{{ end }}
 LOG_LEVEL=DEBUG
 EOH
         destination = "local/services.env"
