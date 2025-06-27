@@ -1,12 +1,30 @@
 variable "gcp_project_id" {
-  description = "The GCP project ID to deploy resources into."
+  description = "The GCP project ID"
   type        = string
 }
 
 variable "gcp_region" {
-  description = "The GCP region to deploy resources into."
+  description = "The GCP region"
   type        = string
   default     = "us-central1"
+}
+
+variable "gcp_zone" {
+  description = "The GCP zone"
+  type        = string
+  default     = "us-central1-b"
+}
+
+variable "admin_api_token" {
+  description = "The secret token for the Admin API"
+  type        = string
+  sensitive   = true
+}
+
+variable "core_subnet_cidr" {
+  description = "The IP CIDR range for the core services subnet"
+  type        = string
+  default     = "10.0.3.0/24"
 }
 
 variable "vpc_name" {
@@ -25,4 +43,10 @@ variable "bots_subnet_cidr" {
   description = "The IP CIDR range for the bots subnet."
   type        = string
   default     = "10.0.2.0/24"
+}
+
+variable "nomad_addr" {
+  description = "Nomad API address, e.g. http://34.170.153.20:4646"
+  type        = string
+  default     = "http://34.170.153.20:4646"
 }

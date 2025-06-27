@@ -2,6 +2,12 @@ job "nomad-autoscaler" {
   datacenters = ["dc1"]
   type        = "service"
 
+  # Constraint to run on core services plane
+  constraint {
+    attribute = "${node.class}"
+    value     = "core"
+  }
+
   # Remove Consul dependency - run on any available node
   constraint {
     attribute = "${node.class}"

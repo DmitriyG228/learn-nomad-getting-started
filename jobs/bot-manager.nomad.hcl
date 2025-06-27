@@ -2,6 +2,12 @@ job "bot-manager" {
   datacenters = ["dc1"]
   type        = "service"
 
+  # Constraint to run on core services plane
+  constraint {
+    attribute = "${node.class}"
+    value     = "core"
+  }
+
   group "bot-manager" {
     count = 1
     

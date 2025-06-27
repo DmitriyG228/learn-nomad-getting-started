@@ -2,6 +2,12 @@ job "redis" {
   datacenters = ["dc1"]
   type        = "service"
 
+  # Constraint to run on core services plane
+  constraint {
+    attribute = "${node.class}"
+    value     = "core"
+  }
+
   group "redis-db" {
     count = 1
 

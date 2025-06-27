@@ -21,6 +21,14 @@ resource "google_compute_subnetwork" "bots" {
   network       = google_compute_network.main.id
 }
 
+# Subnet for core services instances (admin-api, redis, etc.)
+resource "google_compute_subnetwork" "core" {
+  name          = "core-subnet"
+  ip_cidr_range = var.core_subnet_cidr
+  region        = var.gcp_region
+  network       = google_compute_network.main.id
+}
+
 # Firewall rule to allow internal traffic within the VPC
 resource "google_compute_firewall" "allow-internal" {
   name    = "${var.vpc_name}-allow-internal"
@@ -48,4 +56,54 @@ resource "google_compute_firewall" "allow-ssh" {
     ports    = ["22"]
   }
   source_ranges = ["0.0.0.0/0"]
+}
+
+# Firewall rule to allow Nomad and Consul communication
+resource "google_compute_firewall" "allow-nomad-consul" {
+  name    = "${var.vpc_name}-allow-nomad-consul"
+  network = google_compute_network.main.name
+  
+  allow {
+    protocol = "tcp"
+    ports    = [
+      "4646", # Nomad HTTP
+      "4647", # Nomad RPC
+      "4648", # Nomad Serf
+      "8300", # Consul server RPC
+      "8301", # Consul LAN Serf
+      "8302", # Consul WAN Serf
+      "8500", # Consul HTTP
+      "8502", # Consul gRPC
+      "8600"  # Consul DNS
+    ]
+  }
+  
+  allow {
+    protocol = "udp"
+    ports    = [
+      "4648", # Nomad Serf
+      "8301", # Consul LAN Serf
+      "8302", # Consul WAN Serf
+      "8600"  # Consul DNS
+    ]
+  }
+  
+  source_ranges = ["10.0.0.0/8"]
+}
+
+# Firewall rule to allow web UIs from anywhere (optional for demo)
+resource "google_compute_firewall" "allow-web-ui" {
+  name    = "${var.vpc_name}-allow-web-ui"
+  network = google_compute_network.main.name
+  
+  allow {
+    protocol = "tcp"
+    ports    = [
+      "4646", # Nomad UI
+      "8500"  # Consul UI
+    ]
+  }
+  
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["management"]
 }
