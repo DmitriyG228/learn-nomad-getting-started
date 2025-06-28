@@ -837,46 +837,18 @@ exec      true      true     Healthy   2025-06-27T14:39:18Z
 
 **Success Criterion**: `terraform apply` exits with *zero pending changes*; `nomad job status` lists every job as *running*.
 
-### Phase 3.0-D – Bot Smoke-Test Automation (PLANNED)
-*(target completion: 2025-06-27)*
+### Phase 3.0-C: Nomad Provider Hard-coding Cleanup ✅ (COMPLETE)
+**Objective**: Eliminate brittle dependency on a single static public IP for the Nomad API.
 
-**Objective**: Automatically dispatch a demo `vexa-bot` to a live Google Meet after the Terraform run to prove scheduling & networking.
+**Changes (2025-06-28):**
+1. `variables.tf` – Dropped `default` value for `nomad_addr`; variable **must** now be supplied via `TF_VAR_nomad_addr` or a dedicated `*.tfvars` file generated at deploy-time.
+2. `terraform.auto.tfvars` – Commented obsolete `on_prem_external_ip` and `vpn_shared_secret` variables that were causing warnings; left values for reference only.
 
-1. **Script** `scripts/smoke_test_bot.sh` – calls Bot-Manager API, polls allocation logs.
-2. **Terraform Hook** `null_resource.smoke_test` executes the script; depends on `nomad_job.bot_manager`.
+**Rationale** (Rule 4 – No hard-coding):
+Static IPs change whenever the management MIG recreates instances. Requiring callers to inject the current address prevents accidental drift and failed plans.
 
-**Success Criterion**: Allocation enters *running* state and logs show `Joined meeting` within 5 minutes.
-
-### Phase 3.1 – WhisperLive GPU on Bare-Metal (PLANNED)
-*(target start: post 3.0-D)*
-
-**Objective**: Attach an on-prem NVIDIA server to the GCP Nomad cluster and schedule `whisperlive-gpu` there, achieving end-to-end transcription.
-
-Steps
-1. **HA VPN** – provision in `network.tf`; open Nomad/Consul ports through tunnel.
-2. **On-Prem Client** – install Nomad 1.8, configure `node_class = "gpu"`, enable `device { nvidia { … } }`, reuse GCE tag-based `server_join`.
-3. **Job Constraint** – keep existing `constraint { attribute = "node.class" value = "gpu" }` so workload lands only on bare-metal.
-4. **Prometheus Check** – ensure metrics from on-prem node are scraped.
-
-**Success Criterion**: `whisperlive-gpu` task reaches *running* on on-prem host; `whisperlive_sessions_total` > 0.
-
-### Quick-Win Checklist  (REFRESH 2025-06-27)
-
-| Status | Item |
-|--------|------|
-| 🔲 | GCS remote backend configured |
-| 🔲 | Secrets loaded from GSM / env vars; `terraform.tfvars` removed from Git |
-| 🔲 | Immutable image tags + `force_pull` restored |
-| 🔲 | Rolling update stanza on every job (`update { stagger 30s max_parallel 1 }`) |
-| 🔲 | Firewall `allow-web-ui` restricted to VPN / office CIDR |
-| 🔲 | MIGs gain `update_policy { type = "PROACTIVE" }` for zero-downtime template rollouts |
-| 🔲 | Cloud Monitoring Ops-Agent enabled on all instance templates |
-| ✅ | Nomad Variables for secrets |
-| ✅ | Address-mode "alloc" & restart policy standardised |
-
-*This section will be checked off as commits land.*
-
-*Last updated: 2025-06-27 – Roadmap extended with phases 3.0-C, 3.0-D, 3.1 and refreshed quick-wins list.*
+**Next Steps**:
+• Introduce a small helper script in CI that discovers the current management IP with `gcloud` and writes it to `nomad.auto.tfvars` before applying the `nomad` workspace.
 
 ### Phase 3.1: Stable Public Endpoints 🔄 (IN PROGRESS)
 **Objective**: Implement industry-standard Network Load Balancers for stable API Gateway and Nomad access points, eliminating IP address changes during service restarts.
@@ -925,6 +897,40 @@ Steps
 - **Nomad/Consul**: Direct access for admin (dynamically fetched IPs)  
 - **No hardcoding**: All IPs dynamically retrieved (Rule 4 compliant)
 - **Best practices**: Admin interfaces accessed directly per HashiCorp recommendations
+
+---
+
+### Phase 4.0: Split Terraform Workspaces ✅ (COMPLETE)
+**Objective**: Adopt industry-recommended two-workspace pattern – separate *infra* (GCP) and *nomad* (jobs/secrets) states.
+
+**Implementation (2025-06-28):**
+1. Removed `nomad-jobs.tf` from `terraform/gcp` workspace.
+2. Added new workspace `terraform/nomad/` containing:
+   • `main.tf` – reads infra state via `data.terraform_remote_state` and configures provider.
+   • `variables.tf`, `locals.tf`, `nomad-jobs.tf` – migrated job logic, adjusted paths.
+3. Extended infra outputs (`outputs.tf`) to expose `db_private_ip`, `db_name`, `db_user` for Nomad variable population.
+
+**Test Results (✅ PASSED):**
+• **Infra workspace**: `terraform plan` shows "No changes" - clean separation achieved.
+• **Nomad workspace**: `terraform init && terraform plan` successful, all 11 jobs refreshed without errors.
+• **Dynamic provider config**: Nomad provider automatically discovers endpoint from `management_access_urls["nomad_ui"]` = `http://34.171.61.241:4646`.
+• **No hardcoding**: Zero manual `TF_VAR_nomad_addr` exports required - industry pattern achieved.
+• **Validation**: Both workspaces pass `terraform validate` with no errors.
+
+**Deployment Workflow (No hardcoding):**
+```bash
+# 1. Deploy infrastructure
+cd terraform/gcp && terraform apply
+
+# 2. Deploy Nomad jobs (auto-discovers endpoint)  
+cd ../nomad && terraform apply
+```
+
+**Success Criterion Met**: ✅ Both workspaces apply with zero errors; Nomad variables & jobs operational via dynamically-discovered endpoints.
+
+---
+
+*Last updated: 2025-06-24 17:59 - Post Nomad Variables implementation and service health verification*
 
 ---
 

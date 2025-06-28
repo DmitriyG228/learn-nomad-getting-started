@@ -45,12 +45,6 @@ variable "bots_subnet_cidr" {
   default     = "10.0.2.0/24"
 }
 
-variable "nomad_addr" {
-  description = "Nomad API address, e.g. http://35.188.73.142:4646"
-  type        = string
-  default     = "http://35.188.73.142:4646"
-}
-
 variable "db_password" {
   description = "Custom database password (optional - if not provided, will be auto-generated)"
   type        = string

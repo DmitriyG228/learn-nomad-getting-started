@@ -44,4 +44,19 @@ output "management_access_urls" {
     consul_ui = "http://${data.external.management_ip.result.ip}:8500"
     get_all_ips_command = "gcloud compute instances list --filter='name~management-server' --format='value(networkInterfaces[0].accessConfigs[0].natIP)'"
   }
+}
+
+output "db_private_ip" {
+  description = "Private IP address of Cloud SQL instance"
+  value       = google_sql_database_instance.dev.private_ip_address
+}
+
+output "db_name" {
+  description = "Database name"
+  value       = google_sql_database.vexa.name
+}
+
+output "db_user" {
+  description = "Database user"
+  value       = google_sql_user.postgres.name
 } 
