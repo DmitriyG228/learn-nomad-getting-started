@@ -935,3 +935,29 @@ cd ../nomad && terraform apply
 ---
 
 ### Phase 3.0-B: Cloud Database Integration ✅ (COMPLETE)
+
+### Phase 4.1: Bot Scheduling Fix ✅ (COMPLETE)
+**Issue**: `vexa-bot` dispatches entered endless LOST/PENDING loop – scheduler couldn't reserve 1 GiB on `core` nodes.
+
+**Cause**: Job lacked a node class constraint, so it was trying to run on whichever node satisfied CNI constraints; memory was exhausted on `core` MIG (e2-small).
+
+**Fix (2025-06-28):**
+1. Added constraint in `jobs/vexa-bot.nomad.hcl`:
+   ```hcl
+   constraint {
+     attribute = "${node.class}"
+     value     = "bot"
+   }
+   ```
+2. Redeployed Nomad workspace (`terraform apply`).
+3. Manual dispatch confirmed allocation schedules to `bot` node class; infrastructure issue resolved (container now starts, application error is separate).
+
+**Result**: Scheduler no longer exhausts core nodes; bot workloads land on dedicated bot servers.
+
+---
+
+*Last updated: 2025-06-24 17:59 - Post Nomad Variables implementation and service health verification*
+
+---
+
+### Phase 3.0-B: Cloud Database Integration ✅ (COMPLETE)

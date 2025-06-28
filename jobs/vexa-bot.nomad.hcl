@@ -21,6 +21,12 @@ job "vexa-bot" {
   }
 
   group "bot" {
+    # Ensure the bot lands on the dedicated bot node class (Phase 4.1)
+    constraint {
+      attribute = "${node.class}"
+      value     = "bot"
+    }
+
     count = 1
     
     network {
