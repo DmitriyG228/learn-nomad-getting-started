@@ -49,45 +49,7 @@ resource "google_compute_forwarding_rule" "api_gw" {
   backend_service       = google_compute_region_backend_service.api_gw.self_link
 }
 
-###############################################################################
-# Nomad servers (management MIG)                                             #
-###############################################################################
-
-resource "google_compute_address" "nomad_lb" {
-  name   = "${var.vpc_name}-nomad-ip"
-  region = var.gcp_region
-}
-
-resource "google_compute_region_health_check" "nomad" {
-  name               = "${var.vpc_name}-nomad-hc"
-  region             = var.gcp_region
-  tcp_health_check { port = 4646 }
-  check_interval_sec = 10
-  timeout_sec        = 5
-}
-
-resource "google_compute_region_backend_service" "nomad" {
-  name                  = "${var.vpc_name}-nomad-bs"
-  protocol              = "TCP"
-  region                = var.gcp_region
-  load_balancing_scheme = "EXTERNAL"
-  health_checks         = [google_compute_region_health_check.nomad.self_link]
-
-  backend {
-    group          = google_compute_instance_group_manager.management.instance_group
-    balancing_mode = "CONNECTION"
-  }
-}
-
-resource "google_compute_forwarding_rule" "nomad" {
-  name                  = "${var.vpc_name}-nomad-fr"
-  region                = var.gcp_region
-  load_balancing_scheme = "EXTERNAL"
-  ip_protocol           = "TCP"
-  port_range            = "4646"
-  ip_address            = google_compute_address.nomad_lb.address
-  backend_service       = google_compute_region_backend_service.nomad.self_link
-}
+# Nomad load balancer removed - admin interfaces accessed directly per best practices
 
 ###############################################################################
 # Outputs                                                                    #
@@ -96,9 +58,4 @@ resource "google_compute_forwarding_rule" "nomad" {
 output "api_gateway_public_ip" {
   description = "Static external IP for the API Gateway"
   value       = google_compute_address.api_gw.address
-}
-
-output "nomad_public_ip" {
-  description = "Static external IP for Nomad servers (UI & API)"
-  value       = google_compute_address.nomad_lb.address
 } 

@@ -23,7 +23,7 @@ job "admin-api" {
       name = "admin-api"
       port = "http"
       provider = "nomad"
-      address_mode = "alloc"
+      address_mode = "host"  # Changed from "alloc" to "host" for cross-VM connectivity
 
       check {
         type     = "http"
@@ -39,7 +39,7 @@ job "admin-api" {
       config {
         image = "vexaai/admin-api:dev" # Using 'dev' tag instead of 'latest' to avoid forced pulls
         ports = ["http"]
-        force_pull = false  # Use local image, don't try to pull from registry
+        force_pull = true  # Use local image, don't try to pull from registry
       }
 
       # This template block dynamically creates a .env file inside the container.

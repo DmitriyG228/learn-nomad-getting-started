@@ -23,7 +23,7 @@ job "api-gateway" {
       name = "api-gateway"
       port = "http"
       provider = "nomad"
-      address_mode = "alloc"
+      address_mode = "host"
 
       check {
         type     = "http"
@@ -39,7 +39,7 @@ job "api-gateway" {
       config {
         image = "vexaai/api-gateway:dev"
         ports = ["http"]
-        force_pull = false
+        force_pull = true
       }
 
       # Wait for backend services to be available

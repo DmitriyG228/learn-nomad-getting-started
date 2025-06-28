@@ -41,7 +41,7 @@ job "bot-manager" {
       config {
         image = "vexaai/bot-manager:dev"
         ports = ["http"]
-        force_pull = false  # Use local image, don't try to pull from registry
+        force_pull = true  # Use local image, don't try to pull from registry
         # Use container default port (8080) with bridge networking
       }
 

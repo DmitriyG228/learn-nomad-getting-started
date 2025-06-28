@@ -38,7 +38,7 @@ job "transcription-collector" {
       config {
         image = "vexaai/transcription-collector:dev"
         ports = ["http"]
-        force_pull = false
+        force_pull = true
 
         # Mount alembic configuration files
         volumes = [

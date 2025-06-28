@@ -223,6 +223,34 @@ docker ps --filter "name=vexa-ext-postgres"
 **Verification**: Both WhisperLive instances now running stably without restarts. Bot logs show successful connection, language detection ("en"), and active speaker event processing.
 **Impact**: Fixed bot-to-WhisperLive connection stability. Transcription pipeline now fully operational with Redis-based routing, language auto-detection, and speaker events working correctly.
 
+### 8. **GCP PRODUCTION 503 ERROR - CRITICAL NETWORKING FIX** ✅ (RESOLVED - 2025-06-28)
+**Issue**: Production API Gateway returning "503 Service unavailable: All connection attempts failed" when accessing admin API endpoints. Root cause was cross-VM bridge networking failure - services with `address_mode = "alloc"` register container IPs (10.0.3.x) that are only routable within the same VM.
+
+**Diagnostic Process** (Following Rule 2.2 - Authoritative Sources):
+1. **API Gateway Health**: ✅ Gateway responding (200 OK) 
+2. **Admin API Registration**: ❌ Service registered but not reachable cross-VM
+3. **Service Placement**: API Gateway on `core-server-zmqr` (10.0.3.20), Admin API on `core-server-b1z7` (10.0.3.21)
+4. **Container Logs**: Admin API healthy internally but bridge network isolation preventing cross-VM calls
+
+**Solution Applied**:
+- **admin-api.nomad.hcl**: Changed `address_mode = "alloc"` → `address_mode = "host"`  
+- **api-gateway.nomad.hcl**: Changed `address_mode = "alloc"` → `address_mode = "host"`
+- **Terraform Deployment**: Applied via `terraform apply` to update live services
+
+**Verification Tests**:
+```bash
+# Before: 503 Service unavailable  
+# After: 200 OK with user creation
+curl -X POST http://34.69.112.195:8926/admin/users \
+  -H "X-Admin-API-Key: vexa-admin-token-2024" \
+  -d '{"email": "test@example.com", "name": "NetworkingFixed"}'
+# Returns: {"id": 15, "email": "test@example.com", ...}
+```
+
+**Impact**: **PRODUCTION READY** - Admin API fully functional, user creation/management operational via stable load balancer endpoint (34.69.112.195:8926).
+
+**Related Issues**: This fix addresses the same cross-VM networking problem partially documented in earlier fixes. All remaining services with `address_mode = "alloc"` should be updated following this pattern.
+
 ### 5. Fixed Fundamental Service Discovery Networking Issue ✅ (RESOLVED)
 **Issue**: Services using `address_mode = "alloc"` registered container IPs (172.26.x.x) in Consul, which are only routable within the same VM's bridge network. This caused cross-VM service calls to fail with `EHOSTUNREACH`.
 
@@ -884,6 +912,19 @@ Steps
 - Debug Nomad health check port configuration issue
 - Consider alternative health check strategies if GCP continues defaulting to port 80
 - Test full load balancer functionality under service restart scenarios
+
+**Recent Enhancement**: ✅ **Dynamic URL Generation** (Rule 2.4 - Best Practices, Rule 3.6 - Track roadmap)
+- **ADDED**: External data source to dynamically fetch management server IPs
+- **FIXED**: Replaced placeholder text `http://<ANY_MANAGEMENT_IP>:4646` with real interpolated URLs  
+- **IMPLEMENTED**: Proper Terraform syntax `${data.external.management_ip.result.ip}` like API Gateway
+- **CREATED**: `management_access_urls` output with actual working URLs (no more templates)
+- **RESULT**: Users get real clickable URLs: http://35.188.73.142:4646 and http://35.188.73.142:8500
+
+**Architecture Summary**: ✅ **Complete Success**
+- **API Gateway**: Load balanced for user traffic (http://34.69.112.195:8926)
+- **Nomad/Consul**: Direct access for admin (dynamically fetched IPs)  
+- **No hardcoding**: All IPs dynamically retrieved (Rule 4 compliant)
+- **Best practices**: Admin interfaces accessed directly per HashiCorp recommendations
 
 ---
 

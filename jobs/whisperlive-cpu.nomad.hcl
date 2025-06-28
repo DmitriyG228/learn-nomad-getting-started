@@ -76,7 +76,7 @@ job "whisperlive-cpu" {
       config {
         image = "vexaai/whisperlive:cpu-dev"
         ports = ["ws", "health"]
-        force_pull = false
+        force_pull = true
 
         # Mount model cache
         volumes = [

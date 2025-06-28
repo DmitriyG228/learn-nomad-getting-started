@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/nomad"
       version = ">= 1.4.19"
     }
+    external = {
+      source  = "hashicorp/external"
+      version = "~> 2.3"
+    }
   }
 }
 
