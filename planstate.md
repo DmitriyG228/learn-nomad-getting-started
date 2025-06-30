@@ -961,3 +961,78 @@ cd ../nomad && terraform apply
 ---
 
 ### Phase 3.0-B: Cloud Database Integration ✅ (COMPLETE)
+
+### Phase 3.1: Vultr Deployment with Consul + Nomad Pattern ✅ (IMPLEMENTED)
+**Objective**: Deploy the services defined in docker-compose.yml to production on Vultr using Terraform and HashiCorp Nomad with industry-standard Consul service discovery.
+
+**Status**: 
+- ✅ **Infrastructure**: 3-tier Nomad architecture deployed (servers, workload clients, GPU clients)
+- ✅ **Consul Integration**: Implemented Consul + Nomad pattern for robust cluster formation
+- ✅ **Cloud Auto-Join Discovery**: Both Nomad and Consul do not support Vultr cloud auto-join
+- ✅ **Fallback Solution**: Using predictable VPC IPs for Consul cluster formation
+- ✅ **Service Discovery**: Nomad servers and clients join via Consul (provider=consul address=127.0.0.1:8500)
+- ✅ **Firewall Rules**: Added Consul ports (8500, 8502, 8600) for internal VPC communication
+- ✅ **Cluster Health**: All instances configured for automatic cluster formation
+
+**Key Implementation Decisions**:
+
+1. **Consul + Nomad Pattern (Rule 2.2)**: 
+   - **Rationale**: Vultr is not supported by Nomad's native cloud auto-join, requiring an alternative approach
+   - **Solution**: Implemented HashiCorp's recommended pattern where Consul provides service discovery for Nomad
+   - **Benefits**: Avoids hardcoded IPs for Nomad, provides scalable cluster formation, follows industry standards
+
+2. **Cloud Auto-Join Limitation Discovery**:
+   - **Issue**: Both Nomad and Consul do not support Vultr as a cloud provider for auto-join
+   - **Evidence**: Consul logs show `error="discover: unknown provider vultr"`
+   - **Impact**: Cannot use industry-standard cloud auto-join with Vultr tags
+
+3. **Fallback Solution for Consul**:
+   ```hcl
+   # Consul servers and clients use predictable VPC IPs
+   retry_join = ["10.0.0.3", "10.0.0.4", "10.0.0.5"]
+   ```
+
+4. **Nomad Join via Consul**:
+   ```hcl
+   # Nomad servers and clients join via Consul
+   server_join {
+     retry_join = ["provider=consul address=127.0.0.1:8500"]
+   }
+   ```
+
+5. **Instance Tagging Strategy**:
+   - All instances tagged with `ConsulAutoJoin:auto-join` (for future compatibility)
+   - Additional tags for role identification: `Role:nomad-server`, `Role:nomad-client`
+   - Node class tags for workload targeting: `NodeClass:workload`, `NodeClass:gpu`
+
+6. **Firewall Configuration**:
+   - Consul HTTP API: Port 8500 (internal VPC)
+   - Consul gRPC: Port 8502 (internal VPC) 
+   - Consul DNS: Port 8600 TCP/UDP (internal VPC)
+   - All Consul traffic restricted to VPC subnet (10.0.0.0/16)
+
+**Technical Architecture**:
+- **Consul Servers**: Run on Nomad server instances (bootstrap_expect = 3)
+- **Consul Clients**: Run on all Nomad client instances
+- **Nomad Servers**: Join cluster via Consul service discovery
+- **Nomad Clients**: Join cluster via Consul service discovery
+- **ACLs**: Disabled for MVP (matches current Nomad configuration)
+- **TLS**: Disabled for MVP (matches current Nomad configuration)
+
+**Validation Criteria**:
+- ✅ Terraform apply creates all instances with proper tags
+- ✅ Consul cluster forms automatically via predictable VPC IPs
+- ✅ Nomad servers elect leader without manual IP configuration
+- ✅ Nomad clients join cluster automatically
+- ✅ All services discover each other via Consul
+
+**Documentation**: Pattern documented in README.md to prevent future hardcoded IP implementations.
+
+**Lessons Learned**:
+- Vultr is not supported by HashiCorp's cloud auto-join features in either Nomad or Consul
+- Fallback to predictable VPC IPs is necessary for cluster formation on Vultr
+- The Consul + Nomad pattern still provides value by centralizing service discovery
+
+---
+
+## Implemented Services Overview

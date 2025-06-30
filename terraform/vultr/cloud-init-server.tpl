@@ -1,6 +1,6 @@
 #cloud-config
 # Cloud-init configuration for Nomad server nodes
-# This script installs and configures Nomad, Docker, and required dependencies
+# This script installs and configures Consul, Nomad, Docker, and required dependencies
 
 package_update: true
 package_upgrade: true
@@ -26,10 +26,109 @@ runcmd:
   - systemctl enable docker
   - systemctl start docker
   
-  # Install Nomad
-  - NOMAD_VERSION="${nomad_version}"
+  # Install Consul (industry standard service discovery for Nomad)
+  - CONSUL_VERSION="1.18.0"
   - cd /tmp
-  - curl -sSL https://releases.hashicorp.com/nomad/$${NOMAD_VERSION}/nomad_$${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip
+  - curl -sSL https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip -o consul.zip
+  - unzip consul.zip
+  - chmod +x consul
+  - mv consul /usr/local/bin/consul
+  - rm consul.zip
+  
+  # Create Consul user and directories
+  - useradd --system --home /etc/consul.d --shell /bin/false consul
+  - mkdir -p /opt/consul
+  - mkdir -p /etc/consul.d
+  - chown -R consul:consul /opt/consul
+  - chown -R consul:consul /etc/consul.d
+  
+  # Get private IP for advertise addresses (VPC interface)
+  - PRIVATE_IP=$(ip addr show enp8s0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)
+  
+  # Create Consul configuration
+  - |
+    cat << EOF > /etc/consul.d/consul.hcl
+    # Consul Server Configuration
+    data_dir = "/opt/consul"
+    bind_addr = "0.0.0.0"
+    
+    datacenter = "dc1"
+    
+    # Server configuration
+    server = true
+    bootstrap_expect = 3
+    
+    # Dynamic retry_join list provided by Terraform
+    retry_join = [${retry_join}]
+    retry_max = 3
+    retry_interval = "15s"
+    
+    # Advertise addresses - use actual private IP
+    advertise_addr = "$${PRIVATE_IP}"
+    
+    # Ports configuration
+    ports {
+      http = 8500
+      https = 8501
+      grpc = 8502
+      grpc_tls = 8503
+      dns = 8600
+    }
+    
+    # ACL configuration (disabled for MVP)
+    acl {
+      enabled = false
+    }
+    
+    # TLS configuration (disabled for MVP)
+    tls {
+      defaults {
+        verify_incoming = false
+        verify_outgoing = false
+      }
+    }
+    
+    # Logging
+    log_level = "INFO"
+    
+    # Performance tuning
+    performance {
+      raft_multiplier = 1
+    }
+    EOF
+  
+  # Create Consul systemd service
+  - |
+    cat << 'EOF' > /etc/systemd/system/consul.service
+    [Unit]
+    Description=Consul
+    Documentation=https://www.consul.io/docs/
+    Wants=network-online.target
+    After=network-online.target
+    ConditionFileNotEmpty=/etc/consul.d/consul.hcl
+    
+    [Service]
+    Type=notify
+    User=consul
+    Group=consul
+    ExecStart=/usr/local/bin/consul agent -config-dir=/etc/consul.d
+    ExecReload=/bin/kill -HUP $MAINPID
+    KillMode=process
+    Restart=on-failure
+    LimitNOFILE=65536
+    
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+  
+  # Set proper permissions for Consul
+  - chmod 640 /etc/consul.d/consul.hcl
+  - chown consul:consul /etc/consul.d/consul.hcl
+  
+  # Install Nomad
+  - NOMAD_VERSION="1.9.3"
+  - cd /tmp
+  - curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip
   - unzip nomad.zip
   - chmod +x nomad
   - mv nomad /usr/local/bin/nomad
@@ -42,23 +141,25 @@ runcmd:
   - chown -R nomad:nomad /opt/nomad
   - chown -R nomad:nomad /etc/nomad.d
   
-  # Create Nomad configuration
+  # Create Nomad configuration with Consul integration
   - |
-    cat << 'EOF' > /etc/nomad.d/nomad.hcl
+    cat << EOF > /etc/nomad.d/nomad.hcl
     # Nomad Server Configuration
     data_dir = "/opt/nomad"
     bind_addr = "0.0.0.0"
     
-    datacenter = "${datacenter}"
-    region     = "${region}"
+    datacenter = "dc1"
+    region     = "global"
     
     # Server configuration
     server {
       enabled          = true
-      bootstrap_expect = ${server_count}
+      bootstrap_expect = 3
       
+      # Industry standard: Use Consul for service discovery
+      # This follows HashiCorp's official patterns for robust cluster formation
       server_join {
-        retry_join = [${retry_join_servers}]
+        retry_join = ["provider=consul address=127.0.0.1:8500"]
         retry_max      = 3
         retry_interval = "15s"
       }
@@ -69,11 +170,11 @@ runcmd:
       enabled = false
     }
     
-    # Advertise addresses
+    # Advertise addresses - use actual private IP
     advertise {
-      http = "{{ GetPrivateInterfaces | attr \"address\" }}:4646"
-      rpc  = "{{ GetPrivateInterfaces | attr \"address\" }}:4647"
-      serf = "{{ GetPrivateInterfaces | attr \"address\" }}:4648"
+      http = "$${PRIVATE_IP}:4646"
+      rpc  = "$${PRIVATE_IP}:4647"
+      serf = "$${PRIVATE_IP}:4648"
     }
     
     # Ports configuration
@@ -131,16 +232,25 @@ runcmd:
     WantedBy=multi-user.target
     EOF
   
-  # Create log directory
+  # Create log directories
   - mkdir -p /var/log/nomad
+  - mkdir -p /var/log/consul
   - chown nomad:nomad /var/log/nomad
+  - chown consul:consul /var/log/consul
   
-  # Set proper permissions
+  # Set proper permissions for Nomad
   - chmod 640 /etc/nomad.d/nomad.hcl
   - chown nomad:nomad /etc/nomad.d/nomad.hcl
   
-  # Enable and start Nomad service
+  # Enable and start Consul first (Nomad depends on it)
   - systemctl daemon-reload
+  - systemctl enable consul
+  - systemctl start consul
+  
+  # Wait for Consul to start and form cluster
+  - sleep 30
+  
+  # Enable and start Nomad service
   - systemctl enable nomad
   - systemctl start nomad
   
@@ -149,7 +259,7 @@ runcmd:
   
   # Configure firewall rules for VPC communication
   - ufw --force enable
-  - ufw allow from ${vpc_cidr}
+  - ufw allow from 10.0.0.0/16
   - ufw allow 22/tcp
   - ufw reload
   
@@ -157,12 +267,17 @@ runcmd:
   - hostnamectl set-hostname ${hostname}
   
   # Log completion
-  - echo "Nomad server setup completed at $(date)" >> /var/log/cloud-init-output.log
+  - echo "Consul and Nomad server setup completed at $(date)" >> /var/log/cloud-init-output.log
 
 write_files:
   - path: /etc/profile.d/nomad.sh
     content: |
       export NOMAD_ADDR=http://127.0.0.1:4646
+    permissions: '0644'
+  
+  - path: /etc/profile.d/consul.sh
+    content: |
+      export CONSUL_HTTP_ADDR=http://127.0.0.1:8500
     permissions: '0644'
 
 # Set timezone

@@ -84,6 +84,47 @@ resource "vultr_firewall_rule" "vpc_internal" {
   notes             = "All internal VPC traffic"
 }
 
+# Consul firewall rules for service discovery
+resource "vultr_firewall_rule" "consul_http" {
+  firewall_group_id = vultr_firewall_group.nomad_cluster.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "10.0.0.0"
+  subnet_size       = 16
+  port              = "8500"
+  notes             = "Consul HTTP API (internal)"
+}
+
+resource "vultr_firewall_rule" "consul_grpc" {
+  firewall_group_id = vultr_firewall_group.nomad_cluster.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "10.0.0.0"
+  subnet_size       = 16
+  port              = "8502"
+  notes             = "Consul gRPC (internal)"
+}
+
+resource "vultr_firewall_rule" "consul_dns" {
+  firewall_group_id = vultr_firewall_group.nomad_cluster.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "10.0.0.0"
+  subnet_size       = 16
+  port              = "8600"
+  notes             = "Consul DNS (internal)"
+}
+
+resource "vultr_firewall_rule" "consul_dns_udp" {
+  firewall_group_id = vultr_firewall_group.nomad_cluster.id
+  protocol          = "udp"
+  ip_type           = "v4"
+  subnet            = "10.0.0.0"
+  subnet_size       = 16
+  port              = "8600"
+  notes             = "Consul DNS UDP (internal)"
+}
+
 # Generate random suffix for hostnames
 resource "random_id" "cluster" {
   byte_length = 4
@@ -93,13 +134,23 @@ resource "random_id" "cluster" {
 locals {
   cluster_id = random_id.cluster.hex
   
-  # Generate server join list (all servers join each other)
-  server_join_list = [
-    for i in range(var.nomad_server_count) :
-    "\"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\""
+  # Predictable server IPs based on VPC subnet (10.0.0.0/16)
+  # Vultr assigns IPs sequentially starting from 10.0.0.4
+  server_ips = [
+    "10.0.0.4",
+    "10.0.0.5", 
+    "10.0.0.6"
   ]
   
-  retry_join_servers = join(", ", local.server_join_list)
+  # Server retry_join lists (each server excludes itself)
+  server_retry_joins = [
+    join(", ", formatlist("\"%s\"", [for i, ip in local.server_ips : ip if i != 0])), # Server 1: joins 10.0.0.5, 10.0.0.6
+    join(", ", formatlist("\"%s\"", [for i, ip in local.server_ips : ip if i != 1])), # Server 2: joins 10.0.0.4, 10.0.0.6
+    join(", ", formatlist("\"%s\"", [for i, ip in local.server_ips : ip if i != 2]))  # Server 3: joins 10.0.0.4, 10.0.0.5
+  ]
+  
+  # Client retry_join (all server IPs)
+  client_retry_join = join(", ", formatlist("\"%s\"", local.server_ips))
 }
 
 # Nomad Server Instances
@@ -115,15 +166,23 @@ resource "vultr_instance" "nomad_servers" {
   enable_ipv6         = false
   backups             = "disabled"
   ddos_protection     = false
+  
+  # Industry standard: Tag instances for auto-join
+  # Vultr expects a set of strings for tags
+  tags = [
+    "Name:${var.project_name}-server-${count.index + 1}-${local.cluster_id}",
+    "NomadAutoJoin:auto-join",
+    "NomadType:server",
+    "Environment:${var.environment}",
+    "Project:${var.project_name}",
+    "ConsulAutoJoin:auto-join"
+  ]
 
   user_data = templatefile("${path.module}/cloud-init-server.tpl", {
-    nomad_version         = var.nomad_version
-    datacenter           = var.nomad_datacenter
-    region               = var.nomad_region
-    server_count         = var.nomad_server_count
-    retry_join_servers   = local.retry_join_servers
-    vpc_cidr            = "10.0.0.0/16"
-    hostname            = "${var.project_name}-server-${count.index + 1}-${local.cluster_id}"
+    retry_join = local.server_retry_joins[count.index]
+    hostname   = "${var.project_name}-server-${count.index + 1}-${local.cluster_id}"
+    CONSUL_VERSION = "1.18.0"
+    NOMAD_VERSION = "1.9.3"
   })
 
   # Wait for VPC to be ready
@@ -143,12 +202,22 @@ resource "vultr_instance" "nomad_clients_static" {
   enable_ipv6         = false
   backups             = "disabled"
   ddos_protection     = false
+  
+  # Industry standard: Tag instances for auto-join
+  tags = [
+    "Name:${var.project_name}-client-static-${count.index + 1}-${local.cluster_id}",
+    "NomadAutoJoin:auto-join",
+    "NomadType:client-static",
+    "Environment:${var.environment}",
+    "Project:${var.project_name}",
+    "ConsulAutoJoin:auto-join"
+  ]
 
   user_data = templatefile("${path.module}/cloud-init-client.tpl", {
+    retry_join = local.client_retry_join
     nomad_version         = var.nomad_version
     datacenter           = var.nomad_datacenter
     region               = var.nomad_region
-    retry_join_servers   = local.retry_join_servers
     vpc_cidr            = "10.0.0.0/16"
     hostname            = "${var.project_name}-client-static-${count.index + 1}-${local.cluster_id}"
     node_class          = "static"
@@ -172,12 +241,22 @@ resource "vultr_instance" "nomad_clients_workload" {
   enable_ipv6         = false
   backups             = "disabled"
   ddos_protection     = false
+  
+  # Industry standard: Tag instances for auto-join
+  tags = [
+    "Name:${var.project_name}-client-workload-${count.index + 1}-${local.cluster_id}",
+    "NomadAutoJoin:auto-join",
+    "NomadType:client-workload",
+    "Environment:${var.environment}",
+    "Project:${var.project_name}",
+    "ConsulAutoJoin:auto-join"
+  ]
 
   user_data = templatefile("${path.module}/cloud-init-client.tpl", {
+    retry_join = local.client_retry_join
     nomad_version         = var.nomad_version
     datacenter           = var.nomad_datacenter
     region               = var.nomad_region
-    retry_join_servers   = local.retry_join_servers
     vpc_cidr            = "10.0.0.0/16"
     hostname            = "${var.project_name}-client-workload-${count.index + 1}-${local.cluster_id}"
     node_class          = "workload"
@@ -201,12 +280,22 @@ resource "vultr_instance" "nomad_clients_gpu" {
   enable_ipv6         = false
   backups             = "disabled"
   ddos_protection     = false
+  
+  # Industry standard: Tag instances for auto-join
+  tags = [
+    "Name:${var.project_name}-client-gpu-${count.index + 1}-${local.cluster_id}",
+    "NomadAutoJoin:auto-join",
+    "NomadType:client-gpu",
+    "Environment:${var.environment}",
+    "Project:${var.project_name}",
+    "ConsulAutoJoin:auto-join"
+  ]
 
   user_data = templatefile("${path.module}/cloud-init-client.tpl", {
+    retry_join = local.client_retry_join
     nomad_version         = var.nomad_version
     datacenter           = var.nomad_datacenter
     region               = var.nomad_region
-    retry_join_servers   = local.retry_join_servers
     vpc_cidr            = "10.0.0.0/16"
     hostname            = "${var.project_name}-client-gpu-${count.index + 1}-${local.cluster_id}"
     node_class          = "gpu"
@@ -217,16 +306,19 @@ resource "vultr_instance" "nomad_clients_gpu" {
   depends_on = [vultr_instance.nomad_servers]
 }
 
-# Load Balancer for Nomad Servers
+# Load balancer for Nomad UI
 resource "vultr_load_balancer" "nomad_servers" {
-  region              = var.region
-  label               = "${var.project_name}-${var.environment}-nomad-lb"
+  region = var.region
+  label  = "${var.project_name}-${var.environment}-nomad-lb"
+  vpc    = vultr_vpc.main.id
+
   balancing_algorithm = "roundrobin"
+  ssl_redirect        = false
   proxy_protocol      = false
+
   health_check {
     protocol            = "tcp"
     port                = 4646
-    path                = ""
     check_interval      = 15
     response_timeout    = 5
     unhealthy_threshold = 3
@@ -240,18 +332,129 @@ resource "vultr_load_balancer" "nomad_servers" {
     backend_port      = 4646
   }
 
-  # Attach all server instances to the load balancer
   attached_instances = vultr_instance.nomad_servers[*].id
-
-  # Attach to VPC
-  vpc = vultr_vpc.main.id
-
-  depends_on = [vultr_instance.nomad_servers]
 }
 
-# Save SSH private key locally for access
+# Save SSH private key locally
 resource "local_file" "ssh_private_key" {
   content         = tls_private_key.ssh_key.private_key_pem
-  filename        = "${path.module}/ssh-key-${var.project_name}-${var.environment}.pem"
+  filename        = "${path.module}/ssh-key-vexa-prod.pem"
   file_permission = "0600"
-} 
+  directory_permission = "0777"
+}
+
+# Outputs
+output "nomad_ui_url" {
+  description = "URL for Nomad UI"
+  value       = "http://${vultr_load_balancer.nomad_servers.ipv4}:4646"
+}
+
+output "load_balancer_ip" {
+  description = "Load balancer IP address"
+  value       = vultr_load_balancer.nomad_servers.ipv4
+}
+
+output "vpc_cidr" {
+  description = "VPC CIDR block"
+  value       = "${vultr_vpc.main.v4_subnet}/${vultr_vpc.main.v4_subnet_mask}"
+}
+
+output "vpc_id" {
+  description = "VPC ID"
+  value       = vultr_vpc.main.id
+}
+
+output "firewall_group_id" {
+  description = "Firewall group ID"
+  value       = vultr_firewall_group.nomad_cluster.id
+}
+
+output "nomad_servers" {
+  description = "Nomad server instances"
+  value = {
+    count        = length(vultr_instance.nomad_servers)
+    hostnames    = vultr_instance.nomad_servers[*].hostname
+    instance_ids = vultr_instance.nomad_servers[*].id
+    private_ips  = vultr_instance.nomad_servers[*].internal_ip
+    public_ips   = vultr_instance.nomad_servers[*].main_ip
+  }
+}
+
+output "nomad_clients_static" {
+  description = "Nomad static client instances"
+  value = {
+    count        = length(vultr_instance.nomad_clients_static)
+    hostnames    = vultr_instance.nomad_clients_static[*].hostname
+    instance_ids = vultr_instance.nomad_clients_static[*].id
+    private_ips  = vultr_instance.nomad_clients_static[*].internal_ip
+    public_ips   = vultr_instance.nomad_clients_static[*].main_ip
+  }
+}
+
+output "nomad_clients_workload" {
+  description = "Nomad workload client instances"
+  value = {
+    count        = length(vultr_instance.nomad_clients_workload)
+    hostnames    = vultr_instance.nomad_clients_workload[*].hostname
+    instance_ids = vultr_instance.nomad_clients_workload[*].id
+    private_ips  = vultr_instance.nomad_clients_workload[*].internal_ip
+    public_ips   = vultr_instance.nomad_clients_workload[*].main_ip
+  }
+}
+
+output "nomad_clients_gpu" {
+  description = "Nomad GPU client instances"
+  value = {
+    count        = length(vultr_instance.nomad_clients_gpu)
+    hostnames    = vultr_instance.nomad_clients_gpu[*].hostname
+    instance_ids = vultr_instance.nomad_clients_gpu[*].id
+    private_ips  = vultr_instance.nomad_clients_gpu[*].internal_ip
+    public_ips   = vultr_instance.nomad_clients_gpu[*].main_ip
+  }
+}
+
+output "ssh_command_servers" {
+  description = "SSH commands for server instances"
+  value = [
+    for i, server in vultr_instance.nomad_servers : "ssh root@${server.main_ip}  # ${server.hostname}"
+  ]
+}
+
+output "ssh_command_clients" {
+  description = "SSH commands for client instances"
+  value = concat(
+    [for i, client in vultr_instance.nomad_clients_static : "ssh root@${client.main_ip}  # ${client.hostname} (static services)"],
+    [for i, client in vultr_instance.nomad_clients_workload : "ssh root@${client.main_ip}  # ${client.hostname} (workload)"],
+    [for i, client in vultr_instance.nomad_clients_gpu : "ssh root@${client.main_ip}  # ${client.hostname} (GPU)"]
+  )
+}
+
+output "deployment_summary" {
+  description = "Deployment summary"
+  value = {
+    region                 = var.region
+    vpc_cidr              = "${vultr_vpc.main.v4_subnet}/${vultr_vpc.main.v4_subnet_mask}"
+    nomad_servers          = var.nomad_server_count
+    static_clients         = var.nomad_client_static_count
+    workload_clients       = var.nomad_client_workload_count
+    gpu_clients            = var.nomad_client_gpu_count
+    total_instances        = var.nomad_server_count + var.nomad_client_static_count + var.nomad_client_workload_count + var.nomad_client_gpu_count
+    nomad_ui               = "http://${vultr_load_balancer.nomad_servers.ipv4}:4646"
+    estimated_monthly_cost = (var.nomad_server_count * 12) + (var.nomad_client_static_count * 12) + (var.nomad_client_workload_count * 24) + (var.nomad_client_gpu_count * 200)
+  }
+}
+
+output "next_steps" {
+  description = "Next steps after deployment"
+  value = [
+    "1. Access Nomad UI at: http://${vultr_load_balancer.nomad_servers.ipv4}:4646",
+    "2. Verify cluster health: nomad server members",
+    "3. Check client status: nomad node status",
+    "4. Deploy jobs from vexa-deployment/jobs/ directory",
+    "5. Monitor logs: nomad logs -f <allocation-id>",
+  ]
+}
+
+# --- Post provisioning: push Consul retry list and restart services ---
+# REMOVED: null_resource approach was causing infinite loops
+# Instead, we'll use templatefile to embed retry_join configuration directly 

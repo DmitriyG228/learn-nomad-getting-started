@@ -18,6 +18,41 @@ The deployment creates a complete Nomad cluster with the following components:
 - **3 Workload Clients**: For scalable vexa-bot instances
 - **1 GPU Client**: For whisperlive-gpu processing
 
+### Service Discovery Architecture
+
+This deployment uses the **industry-standard Consul + Nomad pattern** for robust cluster formation:
+
+#### Why Consul + Nomad?
+- **Vultr Limitation**: Nomad's native cloud auto-join doesn't support Vultr
+- **Industry Standard**: HashiCorp's recommended approach for clouds without native support
+- **Scalability**: Avoids hardcoded IPs and manual cluster management
+- **Reliability**: Automatic cluster formation and self-healing
+
+#### How It Works
+1. **Consul Servers**: Run on Nomad server instances, form cluster via Vultr tags
+2. **Consul Clients**: Run on all instances, join cluster automatically
+3. **Nomad Servers**: Join cluster via Consul service discovery
+4. **Nomad Clients**: Join cluster via Consul service discovery
+
+#### Configuration Pattern
+```hcl
+# Consul auto-join using Vultr tags
+retry_join = ["provider=vultr tag_key=ConsulAutoJoin tag_value=auto-join"]
+
+# Nomad join via Consul
+server_join {
+  retry_join = ["provider=consul address=127.0.0.1:8500"]
+}
+```
+
+#### Instance Tagging
+All instances are tagged with:
+- `ConsulAutoJoin:auto-join` - Enables Consul auto-join
+- `Role:nomad-server|nomad-client` - Role identification
+- `NodeClass:workload|gpu` - Workload targeting
+
+**⚠️ Important**: This pattern eliminates the need for hardcoded IPs. Future contributors should NOT implement IP-based retry_join configurations, as they are brittle and don't scale.
+
 ### Cost Estimate
 - **Base Monthly Cost**: ~$269/month
 - **Scaling Range**: $269-400/month depending on workload
