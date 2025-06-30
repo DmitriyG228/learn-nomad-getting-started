@@ -137,8 +137,10 @@ runcmd:
   # Create Nomad user and directories
   - useradd --system --home /etc/nomad.d --shell /bin/false nomad
   - mkdir -p /opt/nomad
+  - mkdir -p /opt/alloc_mounts
   - mkdir -p /etc/nomad.d
   - chown -R nomad:nomad /opt/nomad
+  - chown -R nomad:nomad /opt/alloc_mounts
   - chown -R nomad:nomad /etc/nomad.d
   
   # Create Nomad configuration with Consul integration
