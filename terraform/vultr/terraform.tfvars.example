@@ -1,0 +1,61 @@
+# Vultr API Configuration
+# Required: Get your API key from https://my.vultr.com/settings/#settingsapi
+vultr_api_key = "YOUR_VULTR_API_KEY_HERE"
+
+# Region Configuration
+# See available regions: https://www.vultr.com/api/#operation/list-regions
+# Popular options: "ewr" (New Jersey), "lax" (Los Angeles), "fra" (Frankfurt), "nrt" (Tokyo)
+region = "ewr"
+
+# Project Configuration
+project_name = "vexa"
+environment  = "prod"
+
+# Network Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# Nomad Cluster Configuration
+nomad_server_count = 3  # Must be odd number for quorum (1, 3, 5, 7)
+nomad_datacenter   = "dc1"
+nomad_region      = "global"
+nomad_version     = "1.9.3"
+
+# Client Node Counts (adjust based on workload requirements)
+nomad_client_static_count    = 2  # For redis, admin-api, bot-manager
+nomad_client_workload_count  = 3  # For vexa-bot instances
+nomad_client_gpu_count       = 1  # For whisperlive-gpu
+
+# Instance Plans (see Vultr pricing for options)
+# Server nodes (need more resources for cluster management)
+nomad_server_plan         = "vhp-4c-8gb"  # 4 vCPU, 8GB RAM, 180GB Storage ($48/month)
+nomad_client_static_plan  = "vhp-4c-8gb"  # 4 vCPU, 8GB RAM, 180GB Storage ($48/month)
+
+# Workload nodes (can use smaller instances for scalable workloads)
+nomad_client_workload_plan = "vhp-2c-4gb"  # 2 vCPU, 4GB RAM, 100GB Storage ($24/month)
+
+# GPU nodes (for ML/AI workloads)
+nomad_client_gpu_plan = "vcg-a16-2c-8g-50s-1gpu"  # NVIDIA A16 1/8, 2 vCPU, 8GB RAM, 50GB Storage, 2GB GPU ($43/month)
+
+# Operating System
+os_id = "2179"  # Ubuntu 24.04 LTS x64
+
+# SSH Configuration
+ssh_key_name = "vexa-deployment-key"
+
+# Load Balancer Configuration
+load_balancer_size = "lb-small"  # Options: lb-small, lb-medium, lb-large
+
+# Security Configuration
+allowed_ssh_cidr  = ["0.0.0.0/0"]  # Restrict this in production to your IP range
+allowed_http_cidr = ["0.0.0.0/0"]  # For load balancer access
+
+# Tags for resource management
+tags = {
+  Project     = "vexa"
+  Environment = "prod"
+  ManagedBy   = "terraform"
+  Team        = "platform"
+}
+
+# Docker Configuration
+docker_version = "latest" 

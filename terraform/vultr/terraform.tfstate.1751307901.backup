@@ -1,0 +1,1285 @@
+{
+  "version": 4,
+  "terraform_version": "1.11.4",
+  "serial": 44,
+  "lineage": "a0e8f8db-bd02-de17-0cd7-6f6a892ace84",
+  "outputs": {
+    "deployment_summary": {
+      "value": {
+        "estimated_monthly_cost": 365,
+        "gpu_clients": 1,
+        "nomad_servers": 3,
+        "nomad_ui": "http://66.135.24.138:4646",
+        "region": "ewr",
+        "static_clients": 2,
+        "total_instances": 9,
+        "vpc_cidr": "10.0.0.0/16",
+        "workload_clients": 3
+      },
+      "type": [
+        "object",
+        {
+          "estimated_monthly_cost": "number",
+          "gpu_clients": "number",
+          "nomad_servers": "number",
+          "nomad_ui": "string",
+          "region": "string",
+          "static_clients": "number",
+          "total_instances": "number",
+          "vpc_cidr": "string",
+          "workload_clients": "number"
+        }
+      ]
+    },
+    "firewall_group_id": {
+      "value": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+      "type": "string"
+    },
+    "load_balancer_ip": {
+      "value": "66.135.24.138",
+      "type": "string"
+    },
+    "next_steps": {
+      "value": [
+        "1. Access Nomad UI at: http://66.135.24.138:4646",
+        "2. Verify cluster health: nomad server members",
+        "3. Check client status: nomad node status",
+        "4. Deploy jobs from vexa-deployment/jobs/ directory",
+        "5. Monitor logs: nomad logs -f \u003callocation-id\u003e"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string",
+          "string",
+          "string",
+          "string",
+          "string"
+        ]
+      ]
+    },
+    "nomad_clients_static": {
+      "value": {
+        "count": 2,
+        "hostnames": [
+          "vexa-client-static-1-bd5f90e2",
+          "vexa-client-static-2-bd5f90e2"
+        ],
+        "instance_ids": [
+          "230a959d-3cc4-42f4-aa45-dcb427d05df9",
+          "ec3a8505-1c26-4fde-a039-72af9e30c889"
+        ],
+        "private_ips": [
+          "10.0.0.6",
+          "10.0.0.8"
+        ],
+        "public_ips": [
+          "207.246.123.156",
+          "64.176.222.132"
+        ]
+      },
+      "type": [
+        "object",
+        {
+          "count": "number",
+          "hostnames": [
+            "tuple",
+            [
+              "string",
+              "string"
+            ]
+          ],
+          "instance_ids": [
+            "tuple",
+            [
+              "string",
+              "string"
+            ]
+          ],
+          "private_ips": [
+            "tuple",
+            [
+              "string",
+              "string"
+            ]
+          ],
+          "public_ips": [
+            "tuple",
+            [
+              "string",
+              "string"
+            ]
+          ]
+        }
+      ]
+    },
+    "nomad_clients_workload": {
+      "value": {
+        "count": 3,
+        "hostnames": [
+          "vexa-client-workload-1-bd5f90e2",
+          "vexa-client-workload-2-bd5f90e2",
+          "vexa-client-workload-3-bd5f90e2"
+        ],
+        "instance_ids": [
+          "59b47ecf-97eb-4024-977b-6e084abe6738",
+          "3344fe4f-09ab-4a2b-8157-4f95e846d2d7",
+          "043b4568-f4af-4e45-85b0-87622ca41e52"
+        ],
+        "private_ips": [
+          "10.0.0.9",
+          "10.0.0.7",
+          "10.0.0.10"
+        ],
+        "public_ips": [
+          "104.156.250.46",
+          "64.176.199.145",
+          "45.63.10.113"
+        ]
+      },
+      "type": [
+        "object",
+        {
+          "count": "number",
+          "hostnames": [
+            "tuple",
+            [
+              "string",
+              "string",
+              "string"
+            ]
+          ],
+          "instance_ids": [
+            "tuple",
+            [
+              "string",
+              "string",
+              "string"
+            ]
+          ],
+          "private_ips": [
+            "tuple",
+            [
+              "string",
+              "string",
+              "string"
+            ]
+          ],
+          "public_ips": [
+            "tuple",
+            [
+              "string",
+              "string",
+              "string"
+            ]
+          ]
+        }
+      ]
+    },
+    "nomad_servers": {
+      "value": {
+        "count": 3,
+        "hostnames": [
+          "vexa-server-1-bd5f90e2",
+          "vexa-server-2-bd5f90e2",
+          "vexa-server-3-bd5f90e2"
+        ],
+        "instance_ids": [
+          "082b0221-8d71-4feb-b85a-04e2dd4f1671",
+          "c4309c83-c4be-4146-addd-8f0ec554cf54",
+          "de9ef47c-d013-44ed-baed-94aaecb443dc"
+        ],
+        "private_ips": [
+          "10.0.0.4",
+          "10.0.0.5",
+          "10.0.0.3"
+        ],
+        "public_ips": [
+          "45.77.101.77",
+          "207.148.16.189",
+          "207.246.91.210"
+        ]
+      },
+      "type": [
+        "object",
+        {
+          "count": "number",
+          "hostnames": [
+            "tuple",
+            [
+              "string",
+              "string",
+              "string"
+            ]
+          ],
+          "instance_ids": [
+            "tuple",
+            [
+              "string",
+              "string",
+              "string"
+            ]
+          ],
+          "private_ips": [
+            "tuple",
+            [
+              "string",
+              "string",
+              "string"
+            ]
+          ],
+          "public_ips": [
+            "tuple",
+            [
+              "string",
+              "string",
+              "string"
+            ]
+          ]
+        }
+      ]
+    },
+    "nomad_ui_url": {
+      "value": "http://66.135.24.138:4646",
+      "type": "string"
+    },
+    "ssh_command_servers": {
+      "value": [
+        "ssh root@45.77.101.77  # vexa-server-1-bd5f90e2",
+        "ssh root@207.148.16.189  # vexa-server-2-bd5f90e2",
+        "ssh root@207.246.91.210  # vexa-server-3-bd5f90e2"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string",
+          "string",
+          "string"
+        ]
+      ]
+    },
+    "vpc_cidr": {
+      "value": "10.0.0.0/16",
+      "type": "string"
+    },
+    "vpc_id": {
+      "value": "0e830320-584a-46e9-9eaf-699ec0a11c2c",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "local_file",
+      "name": "ssh_private_key",
+      "provider": "provider[\"registry.terraform.io/hashicorp/local\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "content": "-----BEGIN RSA PRIVATE KEY-----\n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\n-----END RSA PRIVATE KEY-----\n",
+            "content_base64": null,
+            "content_base64sha256": "YjCeCKyBJ9OPb/sQc91JY7kpAgnsbeK85JMybW0wWy4=",
+            "content_base64sha512": "2sWVzvGu2Fm+lFOtdrVvezoZs9mzToxDoqYarpaDzIbC1scvpNe6LzPCSCSWZB7j4sLnjnpkR08HOc3pIJ0+uA==",
+            "content_md5": "2ae446b3bb8c004e2fbbfc96c7c1e95c",
+            "content_sha1": "f5662d0908d51e3159846f4dd4926954e8b7b926",
+            "content_sha256": "62309e08ac8127d38f6ffb1073dd4963b9290209ec6de2bce493326d6d305b2e",
+            "content_sha512": "dac595cef1aed859be9453ad76b56f7b3a19b3d9b34e8c43a2a61aae9683cc86c2d6c72fa4d7ba2f33c2482496641ee3e2c2e78e7a64474f0739cde9209d3eb8",
+            "directory_permission": "0777",
+            "file_permission": "0600",
+            "filename": "./ssh-key-vexa-prod.pem",
+            "id": "f5662d0908d51e3159846f4dd4926954e8b7b926",
+            "sensitive_content": null,
+            "source": null
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "content"
+              }
+            ],
+            [
+              {
+                "type": "get_attr",
+                "value": "sensitive_content"
+              }
+            ]
+          ],
+          "dependencies": [
+            "tls_private_key.ssh_key"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "random_id",
+      "name": "cluster",
+      "provider": "provider[\"registry.terraform.io/hashicorp/random\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "b64_std": "vV+Q4g==",
+            "b64_url": "vV-Q4g",
+            "byte_length": 4,
+            "dec": "3177156834",
+            "hex": "bd5f90e2",
+            "id": "vV-Q4g",
+            "keepers": null,
+            "prefix": null
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "tls_private_key",
+      "name": "ssh_key",
+      "provider": "provider[\"registry.terraform.io/hashicorp/tls\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "algorithm": "RSA",
+            "ecdsa_curve": "P224",
+            "id": "b5d5c9cccf08f356e1ac611a6daa211d792dc0c2",
+            "private_key_openssh": "-----BEGIN OPENSSH PRIVATE KEY-----\n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\n-----END OPENSSH PRIVATE KEY-----\n",
+            "private_key_pem": "-----BEGIN RSA PRIVATE KEY-----\n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\n-----END RSA PRIVATE KEY-----\n",
+            "private_key_pem_pkcs8": "-----BEGIN PRIVATE KEY-----\n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\n8mtLnRy61DA3cI4We3ChoHE+hSlcyw==\n-----END PRIVATE KEY-----\n",
+            "public_key_fingerprint_md5": "1e:01:d7:c4:5b:fb:2c:b3:ea:e8:17:a7:60:0b:3f:21",
+            "public_key_fingerprint_sha256": "SHA256:T5FbV+hNQTR+gAzYti3Su33jbTwauN9n7uv7N7VmTK0",
+            "public_key_openssh": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDQbrBiI2tGEUJ6NFaJIhs387Z2UY7iuJ+Zf4lAF4O2uc85guQGIAPB7EDNYBwlJxdV7hLDjZPvBVlOA2q6J9wFOXPszoN3miOZQXTqte2U4egyiE4UZC8Nyo6S3Bi0BII4sNw9vaSzQ9rDQ3XDYJ6jTTD8R9a5Y3WxnmNxSrqGZTfrjVbyX/YgAbhaF9nN/IfuRaJ8+65UMib66eHpy52247B7ujWr7DaPtZZfWLxiDeypJDKgmWfH6UK96iVrltFXrJPOp1vs0uwz+MBctYkxPTST4iFLyTpaml6+lPycwzo1VQHC7b/xPfZT9Oa6YN0W6IbTjyJ5tGHz59T5RcUuelzy55VWMLD1LpXdZNreLmgkEvKC8ExLselR8GeasK6yMnpvJAmUdhK7lFOAEqRS5g9qTvFsLigruu0Fyn9ISwJw+nb/1UqxGVht67Jh22NHLjQcJ4Ra/Fca3mnlIsSwen+Ll5VL3AcWJ3dNJ2doO0/jp4AyUzZxzVMEWUPjlmsXZZysimZAXahZbmngxlcHqFX0BVtmqgvooztOfZOlUsN46XAqzvuPi6cYHwDEGlg8GjHgegxkHvGYg5LvP51zODgo3XcTGAaNzYvMOiJRXJ9G/8VQQWGJNA29G9ZCgAM6lyLSBHNIZQv8aRe32wVeCUB8v7PQ19uun24ZZhos7Q==\n",
+            "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA0G6wYiNrRhFCejRWiSIb\nN/O2dlGO4rifmX+JQBeDtrnPOYLkBiADwexAzWAcJScXVe4Sw42T7wVZTgNquifc\nBTlz7M6Dd5ojmUF06rXtlOHoMohOFGQvDcqOktwYtASCOLDcPb2ks0Paw0N1w2Ce\no00w/EfWuWN1sZ5jcUq6hmU3641W8l/2IAG4WhfZzfyH7kWifPuuVDIm+unh6cud\ntuOwe7o1q+w2j7WWX1i8Yg3sqSQyoJlnx+lCveola5bRV6yTzqdb7NLsM/jAXLWJ\nMT00k+IhS8k6WppevpT8nMM6NVUBwu2/8T32U/TmumDdFuiG048iebRh8+fU+UXF\nLnpc8ueVVjCw9S6V3WTa3i5oJBLygvBMS7HpUfBnmrCusjJ6byQJlHYSu5RTgBKk\nUuYPak7xbC4oK7rtBcp/SEsCcPp2/9VKsRlYbeuyYdtjRy40HCeEWvxXGt5p5SLE\nsHp/i5eVS9wHFid3TSdnaDtP46eAMlM2cc1TBFlD45ZrF2WcrIpmQF2oWW5p4MZX\nB6hV9AVbZqoL6KM7Tn2TpVLDeOlwKs77j4unGB8AxBpYPBox4HoMZB7xmIOS7z+d\nczg4KN13ExgGjc2LzDoiUVyfRv/FUEFhiTQNvRvWQoADOpci0gRzSGUL/GkXt9sF\nXglAfL+z0Nfbrp9uGWYaLO0CAwEAAQ==\n-----END PUBLIC KEY-----\n",
+            "rsa_bits": 4096
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "private_key_pem_pkcs8"
+              }
+            ],
+            [
+              {
+                "type": "get_attr",
+                "value": "private_key_openssh"
+              }
+            ],
+            [
+              {
+                "type": "get_attr",
+                "value": "private_key_pem"
+              }
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_firewall_group",
+      "name": "nomad_cluster",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "date_created": "2025-06-30T18:11:39+00:00",
+            "date_modified": "2025-06-30T18:11:39+00:00",
+            "description": "vexa-prod-nomad-cluster",
+            "id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "instance_count": 8,
+            "max_rule_count": 50,
+            "rule_count": 6
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_firewall_rule",
+      "name": "docker_ports",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "id": "1",
+            "ip_type": "v4",
+            "notes": "Application ports range",
+            "port": "8000:9000",
+            "protocol": "tcp",
+            "source": "",
+            "subnet": "0.0.0.0",
+            "subnet_size": 0
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "vultr_firewall_group.nomad_cluster"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_firewall_rule",
+      "name": "nomad_http",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "id": "6",
+            "ip_type": "v4",
+            "notes": "Nomad HTTP API",
+            "port": "4646",
+            "protocol": "tcp",
+            "source": "",
+            "subnet": "0.0.0.0",
+            "subnet_size": 0
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "vultr_firewall_group.nomad_cluster"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_firewall_rule",
+      "name": "nomad_rpc",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "id": "5",
+            "ip_type": "v4",
+            "notes": "Nomad RPC (internal)",
+            "port": "4647",
+            "protocol": "tcp",
+            "source": "",
+            "subnet": "10.0.0.0",
+            "subnet_size": 16
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "vultr_firewall_group.nomad_cluster"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_firewall_rule",
+      "name": "nomad_serf",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "id": "3",
+            "ip_type": "v4",
+            "notes": "Nomad Serf (internal)",
+            "port": "4648",
+            "protocol": "tcp",
+            "source": "",
+            "subnet": "10.0.0.0",
+            "subnet_size": 16
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "vultr_firewall_group.nomad_cluster"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_firewall_rule",
+      "name": "ssh",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "id": "4",
+            "ip_type": "v4",
+            "notes": "SSH access",
+            "port": "22",
+            "protocol": "tcp",
+            "source": "",
+            "subnet": "0.0.0.0",
+            "subnet_size": 0
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "vultr_firewall_group.nomad_cluster"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_firewall_rule",
+      "name": "vpc_internal",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "id": "2",
+            "ip_type": "v4",
+            "notes": "All internal VPC traffic",
+            "port": "1:65535",
+            "protocol": "tcp",
+            "source": "",
+            "subnet": "10.0.0.0",
+            "subnet_size": 16
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "vultr_firewall_group.nomad_cluster"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_instance",
+      "name": "nomad_clients_static",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "activation_email": null,
+            "allowed_bandwidth": 9,
+            "app_id": 0,
+            "app_variables": null,
+            "backups": "disabled",
+            "backups_schedule": [],
+            "date_created": "2025-06-30T18:14:14+00:00",
+            "ddos_protection": false,
+            "default_password": "9Y.y,_jfFEnKE6k[",
+            "disable_public_ipv4": null,
+            "disk": 180,
+            "enable_ipv6": false,
+            "features": [],
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "gateway_v4": "207.246.122.1",
+            "hostname": "vexa-client-static-1-bd5f90e2",
+            "id": "230a959d-3cc4-42f4-aa45-dcb427d05df9",
+            "image_id": null,
+            "internal_ip": "10.0.0.6",
+            "ipxe_chain_url": null,
+            "iso_id": null,
+            "kvm": "https://my.vultr.com/subs/vps/novnc/api.php?data=djJ8QUpWU3BTTEdfMkNlR2d0WHdVb3djVlJDQmVvNGs4bU587YSvNaHZ5H92pzcOd0iTDIiGwZx_hReVTtFXbOviyMfJ8iqsMnOCoCAY6MXOidO-wNP9C39d8DCXBu-YvB8l2xWeSBkgzsSb4RVZxMAgNwPSpKf6Mnvxyilb85bxQTkGp1vIyjmIBVVwFDjfXUgBDFrz2fAaty9bMkeZIX54hwtNyuzoy_DG005-gv4Q2L0",
+            "label": null,
+            "main_ip": "207.246.123.156",
+            "netmask_v4": "255.255.254.0",
+            "os": "Ubuntu 22.04 x64",
+            "os_id": 1743,
+            "plan": "vhp-4c-8gb-amd",
+            "power_status": "running",
+            "ram": 8192,
+            "region": "ewr",
+            "reserved_ip_id": null,
+            "script_id": null,
+            "server_status": "ok",
+            "snapshot_id": null,
+            "ssh_key_ids": [
+              "3b8c82ea-46f3-42f1-bdea-f396d6e16e6b"
+            ],
+            "status": "active",
+            "tags": [],
+            "timeouts": null,
+            "user_data": "#cloud-config\n# Cloud-init configuration for Nomad client nodes\n# This script installs and configures Nomad, Docker, and required dependencies\n\npackage_update: true\npackage_upgrade: true\n\npackages:\n  - unzip\n  - curl\n  - jq\n  - wget\n  - htop\n  - net-tools\n  - ufw\n\n# Disable UFW initially for easier setup\nruncmd:\n  # Disable UFW firewall (will be configured via Vultr firewall groups)\n  - sudo ufw --force disable\n  \n  # Install Docker\n  - curl -fsSL https://get.docker.com -o get-docker.sh\n  - sh get-docker.sh\n  - usermod -aG docker root\n  - systemctl enable docker\n  - systemctl start docker\n  \n  \n  \n  # Install Nomad\n  - NOMAD_VERSION=\"1.9.3\"\n  - cd /tmp\n  - curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip\n  - unzip nomad.zip\n  - chmod +x nomad\n  - mv nomad /usr/local/bin/nomad\n  - rm nomad.zip\n  \n  # Create Nomad user and directories\n  - useradd --system --home /etc/nomad.d --shell /bin/false nomad\n  - mkdir -p /opt/nomad\n  - mkdir -p /etc/nomad.d\n  - chown -R nomad:nomad /opt/nomad\n  - chown -R nomad:nomad /etc/nomad.d\n  \n  # Create Nomad configuration\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/nomad.d/nomad.hcl\n    # Nomad Client Configuration\n    data_dir = \"/opt/nomad\"\n    bind_addr = \"0.0.0.0\"\n    \n    datacenter = \"dc1\"\n    region     = \"global\"\n    \n    # Server configuration (disabled on clients)\n    server {\n      enabled = false\n    }\n    \n    # Client configuration\n    client {\n      enabled = true\n      \n      server_join {\n        retry_join = [\"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\"]\n        retry_max      = 3\n        retry_interval = \"15s\"\n      }\n      \n      # Node class for workload targeting\n      node_class = \"static\"\n      \n      # Resource configuration\n      reserved {\n        cpu    = 100\n        memory = 256\n      }\n      \n      # Host volumes (if needed for persistent storage)\n      host_volume \"docker_sock\" {\n        path      = \"/var/run/docker.sock\"\n        read_only = false\n      }\n    }\n    \n    # Plugin configuration\n    plugin \"docker\" {\n      config {\n        enabled = true\n        \n        # Docker daemon configuration\n        endpoint = \"unix:///var/run/docker.sock\"\n        \n        # Allow privileged containers (needed for some workloads)\n        allow_privileged = true\n        \n        # Volume configuration\n        volumes {\n          enabled      = true\n          selinuxlabel = \"z\"\n        }\n        \n        \n      }\n    }\n    \n    \n    \n    # Advertise addresses\n    advertise {\n      http = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4646\"\n      rpc  = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4647\"\n      serf = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4648\"\n    }\n    \n    # Ports configuration\n    ports {\n      http = 4646\n      rpc  = 4647\n      serf = 4648\n    }\n    \n    # ACL configuration (disabled for MVP)\n    acl {\n      enabled = false\n    }\n    \n    # TLS configuration (disabled for MVP)\n    tls {\n      http = false\n      rpc  = false\n    }\n    \n    # Logging\n    log_level = \"INFO\"\n    log_file  = \"/var/log/nomad/\"\n    \n    # Performance tuning\n    limits {\n      https_handshake_timeout   = \"5s\"\n      http_max_conns_per_client = 100\n      rpc_handshake_timeout     = \"5s\"\n      rpc_max_conns_per_client  = 100\n    }\n    EOF\n  \n  # Create Nomad systemd service\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/systemd/system/nomad.service\n    [Unit]\n    Description=Nomad\n    Documentation=https://www.nomadproject.io/docs/\n    Wants=network-online.target\n    After=network-online.target\n    ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl\n    \n    [Service]\n    Type=notify\n    User=nomad\n    Group=nomad\n    ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl\n    ExecReload=/bin/kill -HUP $MAINPID\n    KillMode=process\n    Restart=on-failure\n    LimitNOFILE=65536\n    \n    [Install]\n    WantedBy=multi-user.target\n    EOF\n  \n  # Create log directory\n  - mkdir -p /var/log/nomad\n  - chown nomad:nomad /var/log/nomad\n  \n  # Set proper permissions\n  - chmod 640 /etc/nomad.d/nomad.hcl\n  - chown nomad:nomad /etc/nomad.d/nomad.hcl\n  \n  # Add nomad user to docker group for Docker plugin\n  - usermod -aG docker nomad\n  \n  # Enable and start Nomad service\n  - systemctl daemon-reload\n  - systemctl enable nomad\n  - systemctl start nomad\n  \n  # Wait for Nomad to start\n  - sleep 30\n  \n  # Configure firewall rules for VPC communication\n  - ufw --force enable\n  - ufw allow from 10.0.0.0/16\n  - ufw allow 22/tcp\n  - ufw reload\n  \n  # Set hostname\n  - hostnamectl set-hostname vexa-client-static-1-bd5f90e2\n  \n  \n  \n  # Log completion\n  - echo \"Nomad client setup completed at $(date)\" \u003e\u003e /var/log/cloud-init-output.log\n\nwrite_files:\n  - path: /etc/profile.d/nomad.sh\n    content: |\n      export NOMAD_ADDR=http://127.0.0.1:4646\n    permissions: '0644'\n\n# Set timezone\ntimezone: UTC\n\n# Final reboot to ensure all services start properly\npower_state:\n  mode: reboot\n  condition: True ",
+            "user_scheme": "root",
+            "v6_main_ip": "",
+            "v6_network": "",
+            "v6_network_size": 0,
+            "vcpu_count": 4,
+            "vpc2_ids": null,
+            "vpc_ids": [
+              "0e830320-584a-46e9-9eaf-699ec0a11c2c"
+            ]
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "default_password"
+              }
+            ]
+          ],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjM2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "random_id.cluster",
+            "tls_private_key.ssh_key",
+            "vultr_firewall_group.nomad_cluster",
+            "vultr_instance.nomad_servers",
+            "vultr_ssh_key.main",
+            "vultr_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "activation_email": null,
+            "allowed_bandwidth": 9,
+            "app_id": 0,
+            "app_variables": null,
+            "backups": "disabled",
+            "backups_schedule": [],
+            "date_created": "2025-06-30T18:14:14+00:00",
+            "ddos_protection": false,
+            "default_password": "8tP#*4weWqC?ejE*",
+            "disable_public_ipv4": null,
+            "disk": 180,
+            "enable_ipv6": false,
+            "features": [],
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "gateway_v4": "64.176.222.1",
+            "hostname": "vexa-client-static-2-bd5f90e2",
+            "id": "ec3a8505-1c26-4fde-a039-72af9e30c889",
+            "image_id": null,
+            "internal_ip": "10.0.0.8",
+            "ipxe_chain_url": null,
+            "iso_id": null,
+            "kvm": "https://my.vultr.com/subs/vps/novnc/api.php?data=djJ8dnNRQVVReDlScDBpaTVMU05jcy1scTFXTGNjQVhHRXB8ZaPOltnxeGIPXqxRfkmuETTKl7JTXbyR-4rvWcgvr1gx0LZgSEuk3OKh9CFItM1aQNZPAeeT8wrmEkw3xSk8AKVB7a6Q2g7R0NLhm6YLIprygaMxw6LJ4kevoGCK6iAwBkrJKv_VOa3xCtY41B5ENXR9rCT8izhDwPVbTcVCFvGw3aKPRhG5i6d7QIR3iUk",
+            "label": null,
+            "main_ip": "64.176.222.132",
+            "netmask_v4": "255.255.254.0",
+            "os": "Ubuntu 22.04 x64",
+            "os_id": 1743,
+            "plan": "vhp-4c-8gb-amd",
+            "power_status": "running",
+            "ram": 8192,
+            "region": "ewr",
+            "reserved_ip_id": null,
+            "script_id": null,
+            "server_status": "ok",
+            "snapshot_id": null,
+            "ssh_key_ids": [
+              "3b8c82ea-46f3-42f1-bdea-f396d6e16e6b"
+            ],
+            "status": "active",
+            "tags": [],
+            "timeouts": null,
+            "user_data": "#cloud-config\n# Cloud-init configuration for Nomad client nodes\n# This script installs and configures Nomad, Docker, and required dependencies\n\npackage_update: true\npackage_upgrade: true\n\npackages:\n  - unzip\n  - curl\n  - jq\n  - wget\n  - htop\n  - net-tools\n  - ufw\n\n# Disable UFW initially for easier setup\nruncmd:\n  # Disable UFW firewall (will be configured via Vultr firewall groups)\n  - sudo ufw --force disable\n  \n  # Install Docker\n  - curl -fsSL https://get.docker.com -o get-docker.sh\n  - sh get-docker.sh\n  - usermod -aG docker root\n  - systemctl enable docker\n  - systemctl start docker\n  \n  \n  \n  # Install Nomad\n  - NOMAD_VERSION=\"1.9.3\"\n  - cd /tmp\n  - curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip\n  - unzip nomad.zip\n  - chmod +x nomad\n  - mv nomad /usr/local/bin/nomad\n  - rm nomad.zip\n  \n  # Create Nomad user and directories\n  - useradd --system --home /etc/nomad.d --shell /bin/false nomad\n  - mkdir -p /opt/nomad\n  - mkdir -p /etc/nomad.d\n  - chown -R nomad:nomad /opt/nomad\n  - chown -R nomad:nomad /etc/nomad.d\n  \n  # Create Nomad configuration\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/nomad.d/nomad.hcl\n    # Nomad Client Configuration\n    data_dir = \"/opt/nomad\"\n    bind_addr = \"0.0.0.0\"\n    \n    datacenter = \"dc1\"\n    region     = \"global\"\n    \n    # Server configuration (disabled on clients)\n    server {\n      enabled = false\n    }\n    \n    # Client configuration\n    client {\n      enabled = true\n      \n      server_join {\n        retry_join = [\"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\"]\n        retry_max      = 3\n        retry_interval = \"15s\"\n      }\n      \n      # Node class for workload targeting\n      node_class = \"static\"\n      \n      # Resource configuration\n      reserved {\n        cpu    = 100\n        memory = 256\n      }\n      \n      # Host volumes (if needed for persistent storage)\n      host_volume \"docker_sock\" {\n        path      = \"/var/run/docker.sock\"\n        read_only = false\n      }\n    }\n    \n    # Plugin configuration\n    plugin \"docker\" {\n      config {\n        enabled = true\n        \n        # Docker daemon configuration\n        endpoint = \"unix:///var/run/docker.sock\"\n        \n        # Allow privileged containers (needed for some workloads)\n        allow_privileged = true\n        \n        # Volume configuration\n        volumes {\n          enabled      = true\n          selinuxlabel = \"z\"\n        }\n        \n        \n      }\n    }\n    \n    \n    \n    # Advertise addresses\n    advertise {\n      http = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4646\"\n      rpc  = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4647\"\n      serf = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4648\"\n    }\n    \n    # Ports configuration\n    ports {\n      http = 4646\n      rpc  = 4647\n      serf = 4648\n    }\n    \n    # ACL configuration (disabled for MVP)\n    acl {\n      enabled = false\n    }\n    \n    # TLS configuration (disabled for MVP)\n    tls {\n      http = false\n      rpc  = false\n    }\n    \n    # Logging\n    log_level = \"INFO\"\n    log_file  = \"/var/log/nomad/\"\n    \n    # Performance tuning\n    limits {\n      https_handshake_timeout   = \"5s\"\n      http_max_conns_per_client = 100\n      rpc_handshake_timeout     = \"5s\"\n      rpc_max_conns_per_client  = 100\n    }\n    EOF\n  \n  # Create Nomad systemd service\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/systemd/system/nomad.service\n    [Unit]\n    Description=Nomad\n    Documentation=https://www.nomadproject.io/docs/\n    Wants=network-online.target\n    After=network-online.target\n    ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl\n    \n    [Service]\n    Type=notify\n    User=nomad\n    Group=nomad\n    ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl\n    ExecReload=/bin/kill -HUP $MAINPID\n    KillMode=process\n    Restart=on-failure\n    LimitNOFILE=65536\n    \n    [Install]\n    WantedBy=multi-user.target\n    EOF\n  \n  # Create log directory\n  - mkdir -p /var/log/nomad\n  - chown nomad:nomad /var/log/nomad\n  \n  # Set proper permissions\n  - chmod 640 /etc/nomad.d/nomad.hcl\n  - chown nomad:nomad /etc/nomad.d/nomad.hcl\n  \n  # Add nomad user to docker group for Docker plugin\n  - usermod -aG docker nomad\n  \n  # Enable and start Nomad service\n  - systemctl daemon-reload\n  - systemctl enable nomad\n  - systemctl start nomad\n  \n  # Wait for Nomad to start\n  - sleep 30\n  \n  # Configure firewall rules for VPC communication\n  - ufw --force enable\n  - ufw allow from 10.0.0.0/16\n  - ufw allow 22/tcp\n  - ufw reload\n  \n  # Set hostname\n  - hostnamectl set-hostname vexa-client-static-2-bd5f90e2\n  \n  \n  \n  # Log completion\n  - echo \"Nomad client setup completed at $(date)\" \u003e\u003e /var/log/cloud-init-output.log\n\nwrite_files:\n  - path: /etc/profile.d/nomad.sh\n    content: |\n      export NOMAD_ADDR=http://127.0.0.1:4646\n    permissions: '0644'\n\n# Set timezone\ntimezone: UTC\n\n# Final reboot to ensure all services start properly\npower_state:\n  mode: reboot\n  condition: True ",
+            "user_scheme": "root",
+            "v6_main_ip": "",
+            "v6_network": "",
+            "v6_network_size": 0,
+            "vcpu_count": 4,
+            "vpc2_ids": null,
+            "vpc_ids": [
+              "0e830320-584a-46e9-9eaf-699ec0a11c2c"
+            ]
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "default_password"
+              }
+            ]
+          ],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjM2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "random_id.cluster",
+            "tls_private_key.ssh_key",
+            "vultr_firewall_group.nomad_cluster",
+            "vultr_instance.nomad_servers",
+            "vultr_ssh_key.main",
+            "vultr_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_instance",
+      "name": "nomad_clients_workload",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "activation_email": null,
+            "allowed_bandwidth": 7,
+            "app_id": 0,
+            "app_variables": null,
+            "backups": "disabled",
+            "backups_schedule": [],
+            "date_created": "2025-06-30T18:14:14+00:00",
+            "ddos_protection": false,
+            "default_password": "5nF_eJ5q,ik}TZGP",
+            "disable_public_ipv4": null,
+            "disk": 100,
+            "enable_ipv6": false,
+            "features": [],
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "gateway_v4": "104.156.250.1",
+            "hostname": "vexa-client-workload-1-bd5f90e2",
+            "id": "59b47ecf-97eb-4024-977b-6e084abe6738",
+            "image_id": null,
+            "internal_ip": "10.0.0.9",
+            "ipxe_chain_url": null,
+            "iso_id": null,
+            "kvm": "https://my.vultr.com/subs/vps/novnc/api.php?data=djJ8QVFCMzU2VWhtZGlCbXRtemptU0dwNDZxMjRwMWNGVS18v2JvfsevY5ekmiQRKjAZTgFN84jwTJVgHsyro2M8K5XqfQczX_H2gvvBONqlP9b6y2XBYp9lddr1-EbpA1pOTVYgItV20A5Rd1J2R4-_TRRiR85on5sTEDtX3_zzEw27-Gj0KuL4l0z7SMav0bBPzMNp62XafidXFRHnl8BZioOKDZjUEQPL5E9W_0G-nFQ",
+            "label": null,
+            "main_ip": "104.156.250.46",
+            "netmask_v4": "255.255.254.0",
+            "os": "Ubuntu 22.04 x64",
+            "os_id": 1743,
+            "plan": "vhp-2c-4gb-amd",
+            "power_status": "running",
+            "ram": 4096,
+            "region": "ewr",
+            "reserved_ip_id": null,
+            "script_id": null,
+            "server_status": "ok",
+            "snapshot_id": null,
+            "ssh_key_ids": [
+              "3b8c82ea-46f3-42f1-bdea-f396d6e16e6b"
+            ],
+            "status": "active",
+            "tags": [],
+            "timeouts": null,
+            "user_data": "#cloud-config\n# Cloud-init configuration for Nomad client nodes\n# This script installs and configures Nomad, Docker, and required dependencies\n\npackage_update: true\npackage_upgrade: true\n\npackages:\n  - unzip\n  - curl\n  - jq\n  - wget\n  - htop\n  - net-tools\n  - ufw\n\n# Disable UFW initially for easier setup\nruncmd:\n  # Disable UFW firewall (will be configured via Vultr firewall groups)\n  - sudo ufw --force disable\n  \n  # Install Docker\n  - curl -fsSL https://get.docker.com -o get-docker.sh\n  - sh get-docker.sh\n  - usermod -aG docker root\n  - systemctl enable docker\n  - systemctl start docker\n  \n  \n  \n  # Install Nomad\n  - NOMAD_VERSION=\"1.9.3\"\n  - cd /tmp\n  - curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip\n  - unzip nomad.zip\n  - chmod +x nomad\n  - mv nomad /usr/local/bin/nomad\n  - rm nomad.zip\n  \n  # Create Nomad user and directories\n  - useradd --system --home /etc/nomad.d --shell /bin/false nomad\n  - mkdir -p /opt/nomad\n  - mkdir -p /etc/nomad.d\n  - chown -R nomad:nomad /opt/nomad\n  - chown -R nomad:nomad /etc/nomad.d\n  \n  # Create Nomad configuration\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/nomad.d/nomad.hcl\n    # Nomad Client Configuration\n    data_dir = \"/opt/nomad\"\n    bind_addr = \"0.0.0.0\"\n    \n    datacenter = \"dc1\"\n    region     = \"global\"\n    \n    # Server configuration (disabled on clients)\n    server {\n      enabled = false\n    }\n    \n    # Client configuration\n    client {\n      enabled = true\n      \n      server_join {\n        retry_join = [\"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\"]\n        retry_max      = 3\n        retry_interval = \"15s\"\n      }\n      \n      # Node class for workload targeting\n      node_class = \"workload\"\n      \n      # Resource configuration\n      reserved {\n        cpu    = 100\n        memory = 256\n      }\n      \n      # Host volumes (if needed for persistent storage)\n      host_volume \"docker_sock\" {\n        path      = \"/var/run/docker.sock\"\n        read_only = false\n      }\n    }\n    \n    # Plugin configuration\n    plugin \"docker\" {\n      config {\n        enabled = true\n        \n        # Docker daemon configuration\n        endpoint = \"unix:///var/run/docker.sock\"\n        \n        # Allow privileged containers (needed for some workloads)\n        allow_privileged = true\n        \n        # Volume configuration\n        volumes {\n          enabled      = true\n          selinuxlabel = \"z\"\n        }\n        \n        \n      }\n    }\n    \n    \n    \n    # Advertise addresses\n    advertise {\n      http = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4646\"\n      rpc  = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4647\"\n      serf = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4648\"\n    }\n    \n    # Ports configuration\n    ports {\n      http = 4646\n      rpc  = 4647\n      serf = 4648\n    }\n    \n    # ACL configuration (disabled for MVP)\n    acl {\n      enabled = false\n    }\n    \n    # TLS configuration (disabled for MVP)\n    tls {\n      http = false\n      rpc  = false\n    }\n    \n    # Logging\n    log_level = \"INFO\"\n    log_file  = \"/var/log/nomad/\"\n    \n    # Performance tuning\n    limits {\n      https_handshake_timeout   = \"5s\"\n      http_max_conns_per_client = 100\n      rpc_handshake_timeout     = \"5s\"\n      rpc_max_conns_per_client  = 100\n    }\n    EOF\n  \n  # Create Nomad systemd service\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/systemd/system/nomad.service\n    [Unit]\n    Description=Nomad\n    Documentation=https://www.nomadproject.io/docs/\n    Wants=network-online.target\n    After=network-online.target\n    ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl\n    \n    [Service]\n    Type=notify\n    User=nomad\n    Group=nomad\n    ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl\n    ExecReload=/bin/kill -HUP $MAINPID\n    KillMode=process\n    Restart=on-failure\n    LimitNOFILE=65536\n    \n    [Install]\n    WantedBy=multi-user.target\n    EOF\n  \n  # Create log directory\n  - mkdir -p /var/log/nomad\n  - chown nomad:nomad /var/log/nomad\n  \n  # Set proper permissions\n  - chmod 640 /etc/nomad.d/nomad.hcl\n  - chown nomad:nomad /etc/nomad.d/nomad.hcl\n  \n  # Add nomad user to docker group for Docker plugin\n  - usermod -aG docker nomad\n  \n  # Enable and start Nomad service\n  - systemctl daemon-reload\n  - systemctl enable nomad\n  - systemctl start nomad\n  \n  # Wait for Nomad to start\n  - sleep 30\n  \n  # Configure firewall rules for VPC communication\n  - ufw --force enable\n  - ufw allow from 10.0.0.0/16\n  - ufw allow 22/tcp\n  - ufw reload\n  \n  # Set hostname\n  - hostnamectl set-hostname vexa-client-workload-1-bd5f90e2\n  \n  \n  \n  # Log completion\n  - echo \"Nomad client setup completed at $(date)\" \u003e\u003e /var/log/cloud-init-output.log\n\nwrite_files:\n  - path: /etc/profile.d/nomad.sh\n    content: |\n      export NOMAD_ADDR=http://127.0.0.1:4646\n    permissions: '0644'\n\n# Set timezone\ntimezone: UTC\n\n# Final reboot to ensure all services start properly\npower_state:\n  mode: reboot\n  condition: True ",
+            "user_scheme": "root",
+            "v6_main_ip": "",
+            "v6_network": "",
+            "v6_network_size": 0,
+            "vcpu_count": 2,
+            "vpc2_ids": null,
+            "vpc_ids": [
+              "0e830320-584a-46e9-9eaf-699ec0a11c2c"
+            ]
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "default_password"
+              }
+            ]
+          ],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjM2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "random_id.cluster",
+            "tls_private_key.ssh_key",
+            "vultr_firewall_group.nomad_cluster",
+            "vultr_instance.nomad_servers",
+            "vultr_ssh_key.main",
+            "vultr_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "activation_email": null,
+            "allowed_bandwidth": 7,
+            "app_id": 0,
+            "app_variables": null,
+            "backups": "disabled",
+            "backups_schedule": [],
+            "date_created": "2025-06-30T18:14:14+00:00",
+            "ddos_protection": false,
+            "default_password": "Jh9#7RJL3,RXMq][",
+            "disable_public_ipv4": null,
+            "disk": 100,
+            "enable_ipv6": false,
+            "features": [],
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "gateway_v4": "64.176.198.1",
+            "hostname": "vexa-client-workload-2-bd5f90e2",
+            "id": "3344fe4f-09ab-4a2b-8157-4f95e846d2d7",
+            "image_id": null,
+            "internal_ip": "10.0.0.7",
+            "ipxe_chain_url": null,
+            "iso_id": null,
+            "kvm": "https://my.vultr.com/subs/vps/novnc/api.php?data=djJ8SjFBa29kcW5MdDB1OHhvMjZpYmhEUzA2aGxuNER0cUl8KIhYODHefzqRPPzw5hRvO8jy0rwz_HgZ3rViGoGshCPgpYkVqdyE2IXgVz0Ur0UNa6wNnFoaF57ioMdgPdIxnzxGnMrDHYRDQI8qI3a9Q2N4CDfmP9ddWDYi3SIgftHVskrpQbK1ePx2LxcHksiqd42GOzToegahvIs4-fP-TYATd1pepD4IotKi2Hz5MMw",
+            "label": null,
+            "main_ip": "64.176.199.145",
+            "netmask_v4": "255.255.254.0",
+            "os": "Ubuntu 22.04 x64",
+            "os_id": 1743,
+            "plan": "vhp-2c-4gb-amd",
+            "power_status": "running",
+            "ram": 4096,
+            "region": "ewr",
+            "reserved_ip_id": null,
+            "script_id": null,
+            "server_status": "ok",
+            "snapshot_id": null,
+            "ssh_key_ids": [
+              "3b8c82ea-46f3-42f1-bdea-f396d6e16e6b"
+            ],
+            "status": "active",
+            "tags": [],
+            "timeouts": null,
+            "user_data": "#cloud-config\n# Cloud-init configuration for Nomad client nodes\n# This script installs and configures Nomad, Docker, and required dependencies\n\npackage_update: true\npackage_upgrade: true\n\npackages:\n  - unzip\n  - curl\n  - jq\n  - wget\n  - htop\n  - net-tools\n  - ufw\n\n# Disable UFW initially for easier setup\nruncmd:\n  # Disable UFW firewall (will be configured via Vultr firewall groups)\n  - sudo ufw --force disable\n  \n  # Install Docker\n  - curl -fsSL https://get.docker.com -o get-docker.sh\n  - sh get-docker.sh\n  - usermod -aG docker root\n  - systemctl enable docker\n  - systemctl start docker\n  \n  \n  \n  # Install Nomad\n  - NOMAD_VERSION=\"1.9.3\"\n  - cd /tmp\n  - curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip\n  - unzip nomad.zip\n  - chmod +x nomad\n  - mv nomad /usr/local/bin/nomad\n  - rm nomad.zip\n  \n  # Create Nomad user and directories\n  - useradd --system --home /etc/nomad.d --shell /bin/false nomad\n  - mkdir -p /opt/nomad\n  - mkdir -p /etc/nomad.d\n  - chown -R nomad:nomad /opt/nomad\n  - chown -R nomad:nomad /etc/nomad.d\n  \n  # Create Nomad configuration\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/nomad.d/nomad.hcl\n    # Nomad Client Configuration\n    data_dir = \"/opt/nomad\"\n    bind_addr = \"0.0.0.0\"\n    \n    datacenter = \"dc1\"\n    region     = \"global\"\n    \n    # Server configuration (disabled on clients)\n    server {\n      enabled = false\n    }\n    \n    # Client configuration\n    client {\n      enabled = true\n      \n      server_join {\n        retry_join = [\"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\"]\n        retry_max      = 3\n        retry_interval = \"15s\"\n      }\n      \n      # Node class for workload targeting\n      node_class = \"workload\"\n      \n      # Resource configuration\n      reserved {\n        cpu    = 100\n        memory = 256\n      }\n      \n      # Host volumes (if needed for persistent storage)\n      host_volume \"docker_sock\" {\n        path      = \"/var/run/docker.sock\"\n        read_only = false\n      }\n    }\n    \n    # Plugin configuration\n    plugin \"docker\" {\n      config {\n        enabled = true\n        \n        # Docker daemon configuration\n        endpoint = \"unix:///var/run/docker.sock\"\n        \n        # Allow privileged containers (needed for some workloads)\n        allow_privileged = true\n        \n        # Volume configuration\n        volumes {\n          enabled      = true\n          selinuxlabel = \"z\"\n        }\n        \n        \n      }\n    }\n    \n    \n    \n    # Advertise addresses\n    advertise {\n      http = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4646\"\n      rpc  = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4647\"\n      serf = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4648\"\n    }\n    \n    # Ports configuration\n    ports {\n      http = 4646\n      rpc  = 4647\n      serf = 4648\n    }\n    \n    # ACL configuration (disabled for MVP)\n    acl {\n      enabled = false\n    }\n    \n    # TLS configuration (disabled for MVP)\n    tls {\n      http = false\n      rpc  = false\n    }\n    \n    # Logging\n    log_level = \"INFO\"\n    log_file  = \"/var/log/nomad/\"\n    \n    # Performance tuning\n    limits {\n      https_handshake_timeout   = \"5s\"\n      http_max_conns_per_client = 100\n      rpc_handshake_timeout     = \"5s\"\n      rpc_max_conns_per_client  = 100\n    }\n    EOF\n  \n  # Create Nomad systemd service\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/systemd/system/nomad.service\n    [Unit]\n    Description=Nomad\n    Documentation=https://www.nomadproject.io/docs/\n    Wants=network-online.target\n    After=network-online.target\n    ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl\n    \n    [Service]\n    Type=notify\n    User=nomad\n    Group=nomad\n    ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl\n    ExecReload=/bin/kill -HUP $MAINPID\n    KillMode=process\n    Restart=on-failure\n    LimitNOFILE=65536\n    \n    [Install]\n    WantedBy=multi-user.target\n    EOF\n  \n  # Create log directory\n  - mkdir -p /var/log/nomad\n  - chown nomad:nomad /var/log/nomad\n  \n  # Set proper permissions\n  - chmod 640 /etc/nomad.d/nomad.hcl\n  - chown nomad:nomad /etc/nomad.d/nomad.hcl\n  \n  # Add nomad user to docker group for Docker plugin\n  - usermod -aG docker nomad\n  \n  # Enable and start Nomad service\n  - systemctl daemon-reload\n  - systemctl enable nomad\n  - systemctl start nomad\n  \n  # Wait for Nomad to start\n  - sleep 30\n  \n  # Configure firewall rules for VPC communication\n  - ufw --force enable\n  - ufw allow from 10.0.0.0/16\n  - ufw allow 22/tcp\n  - ufw reload\n  \n  # Set hostname\n  - hostnamectl set-hostname vexa-client-workload-2-bd5f90e2\n  \n  \n  \n  # Log completion\n  - echo \"Nomad client setup completed at $(date)\" \u003e\u003e /var/log/cloud-init-output.log\n\nwrite_files:\n  - path: /etc/profile.d/nomad.sh\n    content: |\n      export NOMAD_ADDR=http://127.0.0.1:4646\n    permissions: '0644'\n\n# Set timezone\ntimezone: UTC\n\n# Final reboot to ensure all services start properly\npower_state:\n  mode: reboot\n  condition: True ",
+            "user_scheme": "root",
+            "v6_main_ip": "",
+            "v6_network": "",
+            "v6_network_size": 0,
+            "vcpu_count": 2,
+            "vpc2_ids": null,
+            "vpc_ids": [
+              "0e830320-584a-46e9-9eaf-699ec0a11c2c"
+            ]
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "default_password"
+              }
+            ]
+          ],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjM2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "random_id.cluster",
+            "tls_private_key.ssh_key",
+            "vultr_firewall_group.nomad_cluster",
+            "vultr_instance.nomad_servers",
+            "vultr_ssh_key.main",
+            "vultr_vpc.main"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 0,
+          "attributes": {
+            "activation_email": null,
+            "allowed_bandwidth": 7,
+            "app_id": 0,
+            "app_variables": null,
+            "backups": "disabled",
+            "backups_schedule": [],
+            "date_created": "2025-06-30T18:14:14+00:00",
+            "ddos_protection": false,
+            "default_password": "5d%N@pP@s.gYu.M}",
+            "disable_public_ipv4": null,
+            "disk": 100,
+            "enable_ipv6": false,
+            "features": [],
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "gateway_v4": "45.63.10.1",
+            "hostname": "vexa-client-workload-3-bd5f90e2",
+            "id": "043b4568-f4af-4e45-85b0-87622ca41e52",
+            "image_id": null,
+            "internal_ip": "10.0.0.10",
+            "ipxe_chain_url": null,
+            "iso_id": null,
+            "kvm": "https://my.vultr.com/subs/vps/novnc/api.php?data=djJ8eHY3aWdTNmw0QUV5VFhabGxYZk5OZllBUnYzYjc2czd8rfhtDOFCy05QlUfOBoVHk-zx93I-uYGyxCTNUDEEvMBSQyEGqH-cAchu1_CV-ESgvFvJjhzRTPTv9wHk33OJaNnbR3i8ZICGNf2LvDU--TZQ3t8kCR-kMqK5KEk4t2h1PeAzgdTkPQRV7T92c598zl9AaJUtIdeOkHFDP11oqZgDzeDgE_RdbuI8Td9H9lM",
+            "label": null,
+            "main_ip": "45.63.10.113",
+            "netmask_v4": "255.255.254.0",
+            "os": "Ubuntu 22.04 x64",
+            "os_id": 1743,
+            "plan": "vhp-2c-4gb-amd",
+            "power_status": "running",
+            "ram": 4096,
+            "region": "ewr",
+            "reserved_ip_id": null,
+            "script_id": null,
+            "server_status": "ok",
+            "snapshot_id": null,
+            "ssh_key_ids": [
+              "3b8c82ea-46f3-42f1-bdea-f396d6e16e6b"
+            ],
+            "status": "active",
+            "tags": [],
+            "timeouts": null,
+            "user_data": "#cloud-config\n# Cloud-init configuration for Nomad client nodes\n# This script installs and configures Nomad, Docker, and required dependencies\n\npackage_update: true\npackage_upgrade: true\n\npackages:\n  - unzip\n  - curl\n  - jq\n  - wget\n  - htop\n  - net-tools\n  - ufw\n\n# Disable UFW initially for easier setup\nruncmd:\n  # Disable UFW firewall (will be configured via Vultr firewall groups)\n  - sudo ufw --force disable\n  \n  # Install Docker\n  - curl -fsSL https://get.docker.com -o get-docker.sh\n  - sh get-docker.sh\n  - usermod -aG docker root\n  - systemctl enable docker\n  - systemctl start docker\n  \n  \n  \n  # Install Nomad\n  - NOMAD_VERSION=\"1.9.3\"\n  - cd /tmp\n  - curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip\n  - unzip nomad.zip\n  - chmod +x nomad\n  - mv nomad /usr/local/bin/nomad\n  - rm nomad.zip\n  \n  # Create Nomad user and directories\n  - useradd --system --home /etc/nomad.d --shell /bin/false nomad\n  - mkdir -p /opt/nomad\n  - mkdir -p /etc/nomad.d\n  - chown -R nomad:nomad /opt/nomad\n  - chown -R nomad:nomad /etc/nomad.d\n  \n  # Create Nomad configuration\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/nomad.d/nomad.hcl\n    # Nomad Client Configuration\n    data_dir = \"/opt/nomad\"\n    bind_addr = \"0.0.0.0\"\n    \n    datacenter = \"dc1\"\n    region     = \"global\"\n    \n    # Server configuration (disabled on clients)\n    server {\n      enabled = false\n    }\n    \n    # Client configuration\n    client {\n      enabled = true\n      \n      server_join {\n        retry_join = [\"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\"]\n        retry_max      = 3\n        retry_interval = \"15s\"\n      }\n      \n      # Node class for workload targeting\n      node_class = \"workload\"\n      \n      # Resource configuration\n      reserved {\n        cpu    = 100\n        memory = 256\n      }\n      \n      # Host volumes (if needed for persistent storage)\n      host_volume \"docker_sock\" {\n        path      = \"/var/run/docker.sock\"\n        read_only = false\n      }\n    }\n    \n    # Plugin configuration\n    plugin \"docker\" {\n      config {\n        enabled = true\n        \n        # Docker daemon configuration\n        endpoint = \"unix:///var/run/docker.sock\"\n        \n        # Allow privileged containers (needed for some workloads)\n        allow_privileged = true\n        \n        # Volume configuration\n        volumes {\n          enabled      = true\n          selinuxlabel = \"z\"\n        }\n        \n        \n      }\n    }\n    \n    \n    \n    # Advertise addresses\n    advertise {\n      http = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4646\"\n      rpc  = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4647\"\n      serf = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4648\"\n    }\n    \n    # Ports configuration\n    ports {\n      http = 4646\n      rpc  = 4647\n      serf = 4648\n    }\n    \n    # ACL configuration (disabled for MVP)\n    acl {\n      enabled = false\n    }\n    \n    # TLS configuration (disabled for MVP)\n    tls {\n      http = false\n      rpc  = false\n    }\n    \n    # Logging\n    log_level = \"INFO\"\n    log_file  = \"/var/log/nomad/\"\n    \n    # Performance tuning\n    limits {\n      https_handshake_timeout   = \"5s\"\n      http_max_conns_per_client = 100\n      rpc_handshake_timeout     = \"5s\"\n      rpc_max_conns_per_client  = 100\n    }\n    EOF\n  \n  # Create Nomad systemd service\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/systemd/system/nomad.service\n    [Unit]\n    Description=Nomad\n    Documentation=https://www.nomadproject.io/docs/\n    Wants=network-online.target\n    After=network-online.target\n    ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl\n    \n    [Service]\n    Type=notify\n    User=nomad\n    Group=nomad\n    ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl\n    ExecReload=/bin/kill -HUP $MAINPID\n    KillMode=process\n    Restart=on-failure\n    LimitNOFILE=65536\n    \n    [Install]\n    WantedBy=multi-user.target\n    EOF\n  \n  # Create log directory\n  - mkdir -p /var/log/nomad\n  - chown nomad:nomad /var/log/nomad\n  \n  # Set proper permissions\n  - chmod 640 /etc/nomad.d/nomad.hcl\n  - chown nomad:nomad /etc/nomad.d/nomad.hcl\n  \n  # Add nomad user to docker group for Docker plugin\n  - usermod -aG docker nomad\n  \n  # Enable and start Nomad service\n  - systemctl daemon-reload\n  - systemctl enable nomad\n  - systemctl start nomad\n  \n  # Wait for Nomad to start\n  - sleep 30\n  \n  # Configure firewall rules for VPC communication\n  - ufw --force enable\n  - ufw allow from 10.0.0.0/16\n  - ufw allow 22/tcp\n  - ufw reload\n  \n  # Set hostname\n  - hostnamectl set-hostname vexa-client-workload-3-bd5f90e2\n  \n  \n  \n  # Log completion\n  - echo \"Nomad client setup completed at $(date)\" \u003e\u003e /var/log/cloud-init-output.log\n\nwrite_files:\n  - path: /etc/profile.d/nomad.sh\n    content: |\n      export NOMAD_ADDR=http://127.0.0.1:4646\n    permissions: '0644'\n\n# Set timezone\ntimezone: UTC\n\n# Final reboot to ensure all services start properly\npower_state:\n  mode: reboot\n  condition: True ",
+            "user_scheme": "root",
+            "v6_main_ip": "",
+            "v6_network": "",
+            "v6_network_size": 0,
+            "vcpu_count": 2,
+            "vpc2_ids": null,
+            "vpc_ids": [
+              "0e830320-584a-46e9-9eaf-699ec0a11c2c"
+            ]
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "default_password"
+              }
+            ]
+          ],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjM2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "random_id.cluster",
+            "tls_private_key.ssh_key",
+            "vultr_firewall_group.nomad_cluster",
+            "vultr_instance.nomad_servers",
+            "vultr_ssh_key.main",
+            "vultr_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_instance",
+      "name": "nomad_servers",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "activation_email": null,
+            "allowed_bandwidth": 9,
+            "app_id": 0,
+            "app_variables": null,
+            "backups": "disabled",
+            "backups_schedule": [],
+            "date_created": "2025-06-30T18:13:17+00:00",
+            "ddos_protection": false,
+            "default_password": "m8.Z}C9b4S7m.p[K",
+            "disable_public_ipv4": null,
+            "disk": 180,
+            "enable_ipv6": false,
+            "features": [],
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "gateway_v4": "45.77.100.1",
+            "hostname": "vexa-server-1-bd5f90e2",
+            "id": "082b0221-8d71-4feb-b85a-04e2dd4f1671",
+            "image_id": null,
+            "internal_ip": "10.0.0.4",
+            "ipxe_chain_url": null,
+            "iso_id": null,
+            "kvm": "https://my.vultr.com/subs/vps/novnc/api.php?data=djJ8ZnBIZm5RUC1XRmttN2g3OW1YMEtNX3JxVW55dFRMVVl8I3p2bzq4fzx6T0CeO_R3Z2F31PRwSO_jhviMTGHYBliO8MYS03yIzuuyviCvcujMexC9IUexd8c-R-gNQAsPs8fVoB1n5VOsdMvPPoGCfHfBQ0Bya1Yvyjhcygsdx02yXWML-MxaaCEAmkJGkvl_qgWljdRK0Nqxj0otYipt5DtZq37GJb7YXmRgL6kbwQ",
+            "label": null,
+            "main_ip": "45.77.101.77",
+            "netmask_v4": "255.255.254.0",
+            "os": "Ubuntu 22.04 x64",
+            "os_id": 1743,
+            "plan": "vhp-4c-8gb",
+            "power_status": "running",
+            "ram": 8192,
+            "region": "ewr",
+            "reserved_ip_id": null,
+            "script_id": null,
+            "server_status": "ok",
+            "snapshot_id": null,
+            "ssh_key_ids": [
+              "3b8c82ea-46f3-42f1-bdea-f396d6e16e6b"
+            ],
+            "status": "active",
+            "tags": [],
+            "timeouts": null,
+            "user_data": "#cloud-config\n# Cloud-init configuration for Nomad server nodes\n# This script installs and configures Nomad, Docker, and required dependencies\n\npackage_update: true\npackage_upgrade: true\n\npackages:\n  - unzip\n  - curl\n  - jq\n  - wget\n  - htop\n  - net-tools\n  - ufw\n\n# Disable UFW initially for easier setup\nruncmd:\n  # Disable UFW firewall (will be configured via Vultr firewall groups)\n  - sudo ufw --force disable\n  \n  # Install Docker\n  - curl -fsSL https://get.docker.com -o get-docker.sh\n  - sh get-docker.sh\n  - usermod -aG docker root\n  - systemctl enable docker\n  - systemctl start docker\n  \n  # Install Nomad\n  - NOMAD_VERSION=\"1.9.3\"\n  - cd /tmp\n  - curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip\n  - unzip nomad.zip\n  - chmod +x nomad\n  - mv nomad /usr/local/bin/nomad\n  - rm nomad.zip\n  \n  # Create Nomad user and directories\n  - useradd --system --home /etc/nomad.d --shell /bin/false nomad\n  - mkdir -p /opt/nomad\n  - mkdir -p /etc/nomad.d\n  - chown -R nomad:nomad /opt/nomad\n  - chown -R nomad:nomad /etc/nomad.d\n  \n  # Create Nomad configuration\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/nomad.d/nomad.hcl\n    # Nomad Server Configuration\n    data_dir = \"/opt/nomad\"\n    bind_addr = \"0.0.0.0\"\n    \n    datacenter = \"dc1\"\n    region     = \"global\"\n    \n    # Server configuration\n    server {\n      enabled          = true\n      bootstrap_expect = 3\n      \n      server_join {\n        retry_join = [\"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\"]\n        retry_max      = 3\n        retry_interval = \"15s\"\n      }\n    }\n    \n    # Client configuration (disabled on servers)\n    client {\n      enabled = false\n    }\n    \n    # Advertise addresses\n    advertise {\n      http = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4646\"\n      rpc  = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4647\"\n      serf = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4648\"\n    }\n    \n    # Ports configuration\n    ports {\n      http = 4646\n      rpc  = 4647\n      serf = 4648\n    }\n    \n    # ACL configuration (disabled for MVP)\n    acl {\n      enabled = false\n    }\n    \n    # TLS configuration (disabled for MVP)\n    tls {\n      http = false\n      rpc  = false\n    }\n    \n    # Logging\n    log_level = \"INFO\"\n    log_file  = \"/var/log/nomad/\"\n    \n    # Performance tuning\n    limits {\n      https_handshake_timeout   = \"5s\"\n      http_max_conns_per_client = 100\n      rpc_handshake_timeout     = \"5s\"\n      rpc_max_conns_per_client  = 100\n    }\n    EOF\n  \n  # Create Nomad systemd service\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/systemd/system/nomad.service\n    [Unit]\n    Description=Nomad\n    Documentation=https://www.nomadproject.io/docs/\n    Wants=network-online.target\n    After=network-online.target\n    ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl\n    \n    [Service]\n    Type=notify\n    User=nomad\n    Group=nomad\n    ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl\n    ExecReload=/bin/kill -HUP $MAINPID\n    KillMode=process\n    Restart=on-failure\n    LimitNOFILE=65536\n    \n    [Install]\n    WantedBy=multi-user.target\n    EOF\n  \n  # Create log directory\n  - mkdir -p /var/log/nomad\n  - chown nomad:nomad /var/log/nomad\n  \n  # Set proper permissions\n  - chmod 640 /etc/nomad.d/nomad.hcl\n  - chown nomad:nomad /etc/nomad.d/nomad.hcl\n  \n  # Enable and start Nomad service\n  - systemctl daemon-reload\n  - systemctl enable nomad\n  - systemctl start nomad\n  \n  # Wait for Nomad to start\n  - sleep 30\n  \n  # Configure firewall rules for VPC communication\n  - ufw --force enable\n  - ufw allow from 10.0.0.0/16\n  - ufw allow 22/tcp\n  - ufw reload\n  \n  # Set hostname\n  - hostnamectl set-hostname vexa-server-1-bd5f90e2\n  \n  # Log completion\n  - echo \"Nomad server setup completed at $(date)\" \u003e\u003e /var/log/cloud-init-output.log\n\nwrite_files:\n  - path: /etc/profile.d/nomad.sh\n    content: |\n      export NOMAD_ADDR=http://127.0.0.1:4646\n    permissions: '0644'\n\n# Set timezone\ntimezone: UTC\n\n# Final reboot to ensure all services start properly\npower_state:\n  mode: reboot\n  condition: True ",
+            "user_scheme": "root",
+            "v6_main_ip": "",
+            "v6_network": "",
+            "v6_network_size": 0,
+            "vcpu_count": 4,
+            "vpc2_ids": null,
+            "vpc_ids": [
+              "0e830320-584a-46e9-9eaf-699ec0a11c2c"
+            ]
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "default_password"
+              }
+            ]
+          ],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjM2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "random_id.cluster",
+            "tls_private_key.ssh_key",
+            "vultr_firewall_group.nomad_cluster",
+            "vultr_ssh_key.main",
+            "vultr_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "activation_email": null,
+            "allowed_bandwidth": 9,
+            "app_id": 0,
+            "app_variables": null,
+            "backups": "disabled",
+            "backups_schedule": [],
+            "date_created": "2025-06-30T18:13:17+00:00",
+            "ddos_protection": false,
+            "default_password": "(Tr8RQRU*eKrGz.W",
+            "disable_public_ipv4": null,
+            "disk": 180,
+            "enable_ipv6": false,
+            "features": [],
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "gateway_v4": "207.148.16.1",
+            "hostname": "vexa-server-2-bd5f90e2",
+            "id": "c4309c83-c4be-4146-addd-8f0ec554cf54",
+            "image_id": null,
+            "internal_ip": "10.0.0.5",
+            "ipxe_chain_url": null,
+            "iso_id": null,
+            "kvm": "https://my.vultr.com/subs/vps/novnc/api.php?data=djJ8VUJ6akV1UGdkNm5yQ3JnQ2RIUmF0b1hpMWYwSUJrRGZ8VKVp8Eo0OFyo4z8IQj2eG4VL92WZtX7K6ZsifsZ5LSfmqE3WUIGrZJuQuebSCMXyWeWI1bpVJBM8BYDTd82_fl04_g9Dyvf8qGMlobChRWeAAf0tTLZHP8nEdmmYGB8uluMCMtPaEYFNnvRzz2o2XqreVIeBhMcAzJD8buB9ioASScLncZckxlzeU8b_YeU",
+            "label": null,
+            "main_ip": "207.148.16.189",
+            "netmask_v4": "255.255.254.0",
+            "os": "Ubuntu 22.04 x64",
+            "os_id": 1743,
+            "plan": "vhp-4c-8gb",
+            "power_status": "running",
+            "ram": 8192,
+            "region": "ewr",
+            "reserved_ip_id": null,
+            "script_id": null,
+            "server_status": "ok",
+            "snapshot_id": null,
+            "ssh_key_ids": [
+              "3b8c82ea-46f3-42f1-bdea-f396d6e16e6b"
+            ],
+            "status": "active",
+            "tags": [],
+            "timeouts": null,
+            "user_data": "#cloud-config\n# Cloud-init configuration for Nomad server nodes\n# This script installs and configures Nomad, Docker, and required dependencies\n\npackage_update: true\npackage_upgrade: true\n\npackages:\n  - unzip\n  - curl\n  - jq\n  - wget\n  - htop\n  - net-tools\n  - ufw\n\n# Disable UFW initially for easier setup\nruncmd:\n  # Disable UFW firewall (will be configured via Vultr firewall groups)\n  - sudo ufw --force disable\n  \n  # Install Docker\n  - curl -fsSL https://get.docker.com -o get-docker.sh\n  - sh get-docker.sh\n  - usermod -aG docker root\n  - systemctl enable docker\n  - systemctl start docker\n  \n  # Install Nomad\n  - NOMAD_VERSION=\"1.9.3\"\n  - cd /tmp\n  - curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip\n  - unzip nomad.zip\n  - chmod +x nomad\n  - mv nomad /usr/local/bin/nomad\n  - rm nomad.zip\n  \n  # Create Nomad user and directories\n  - useradd --system --home /etc/nomad.d --shell /bin/false nomad\n  - mkdir -p /opt/nomad\n  - mkdir -p /etc/nomad.d\n  - chown -R nomad:nomad /opt/nomad\n  - chown -R nomad:nomad /etc/nomad.d\n  \n  # Create Nomad configuration\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/nomad.d/nomad.hcl\n    # Nomad Server Configuration\n    data_dir = \"/opt/nomad\"\n    bind_addr = \"0.0.0.0\"\n    \n    datacenter = \"dc1\"\n    region     = \"global\"\n    \n    # Server configuration\n    server {\n      enabled          = true\n      bootstrap_expect = 3\n      \n      server_join {\n        retry_join = [\"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\"]\n        retry_max      = 3\n        retry_interval = \"15s\"\n      }\n    }\n    \n    # Client configuration (disabled on servers)\n    client {\n      enabled = false\n    }\n    \n    # Advertise addresses\n    advertise {\n      http = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4646\"\n      rpc  = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4647\"\n      serf = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4648\"\n    }\n    \n    # Ports configuration\n    ports {\n      http = 4646\n      rpc  = 4647\n      serf = 4648\n    }\n    \n    # ACL configuration (disabled for MVP)\n    acl {\n      enabled = false\n    }\n    \n    # TLS configuration (disabled for MVP)\n    tls {\n      http = false\n      rpc  = false\n    }\n    \n    # Logging\n    log_level = \"INFO\"\n    log_file  = \"/var/log/nomad/\"\n    \n    # Performance tuning\n    limits {\n      https_handshake_timeout   = \"5s\"\n      http_max_conns_per_client = 100\n      rpc_handshake_timeout     = \"5s\"\n      rpc_max_conns_per_client  = 100\n    }\n    EOF\n  \n  # Create Nomad systemd service\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/systemd/system/nomad.service\n    [Unit]\n    Description=Nomad\n    Documentation=https://www.nomadproject.io/docs/\n    Wants=network-online.target\n    After=network-online.target\n    ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl\n    \n    [Service]\n    Type=notify\n    User=nomad\n    Group=nomad\n    ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl\n    ExecReload=/bin/kill -HUP $MAINPID\n    KillMode=process\n    Restart=on-failure\n    LimitNOFILE=65536\n    \n    [Install]\n    WantedBy=multi-user.target\n    EOF\n  \n  # Create log directory\n  - mkdir -p /var/log/nomad\n  - chown nomad:nomad /var/log/nomad\n  \n  # Set proper permissions\n  - chmod 640 /etc/nomad.d/nomad.hcl\n  - chown nomad:nomad /etc/nomad.d/nomad.hcl\n  \n  # Enable and start Nomad service\n  - systemctl daemon-reload\n  - systemctl enable nomad\n  - systemctl start nomad\n  \n  # Wait for Nomad to start\n  - sleep 30\n  \n  # Configure firewall rules for VPC communication\n  - ufw --force enable\n  - ufw allow from 10.0.0.0/16\n  - ufw allow 22/tcp\n  - ufw reload\n  \n  # Set hostname\n  - hostnamectl set-hostname vexa-server-2-bd5f90e2\n  \n  # Log completion\n  - echo \"Nomad server setup completed at $(date)\" \u003e\u003e /var/log/cloud-init-output.log\n\nwrite_files:\n  - path: /etc/profile.d/nomad.sh\n    content: |\n      export NOMAD_ADDR=http://127.0.0.1:4646\n    permissions: '0644'\n\n# Set timezone\ntimezone: UTC\n\n# Final reboot to ensure all services start properly\npower_state:\n  mode: reboot\n  condition: True ",
+            "user_scheme": "root",
+            "v6_main_ip": "",
+            "v6_network": "",
+            "v6_network_size": 0,
+            "vcpu_count": 4,
+            "vpc2_ids": null,
+            "vpc_ids": [
+              "0e830320-584a-46e9-9eaf-699ec0a11c2c"
+            ]
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "default_password"
+              }
+            ]
+          ],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjM2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "random_id.cluster",
+            "tls_private_key.ssh_key",
+            "vultr_firewall_group.nomad_cluster",
+            "vultr_ssh_key.main",
+            "vultr_vpc.main"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 0,
+          "attributes": {
+            "activation_email": null,
+            "allowed_bandwidth": 9,
+            "app_id": 0,
+            "app_variables": null,
+            "backups": "disabled",
+            "backups_schedule": [],
+            "date_created": "2025-06-30T18:13:17+00:00",
+            "ddos_protection": false,
+            "default_password": "M}6k$_qB2*hGF{XL",
+            "disable_public_ipv4": null,
+            "disk": 180,
+            "enable_ipv6": false,
+            "features": [],
+            "firewall_group_id": "fea52618-f86f-4289-8aee-1f7738ec6b31",
+            "gateway_v4": "207.246.90.1",
+            "hostname": "vexa-server-3-bd5f90e2",
+            "id": "de9ef47c-d013-44ed-baed-94aaecb443dc",
+            "image_id": null,
+            "internal_ip": "10.0.0.3",
+            "ipxe_chain_url": null,
+            "iso_id": null,
+            "kvm": "https://my.vultr.com/subs/vps/novnc/api.php?data=djJ8RS1xTUNuYWtOclN5Wm93VUVhZy1MNm94QlFDNk9say189aVdbPtGGdgsfVCUo8QUeSzbD4ubh6IT5twvHeXshaXftVwjzwLQJZ4WWgIp_WifPaqdl05UxbutKqjtF140Kfq5CFxV0XwQtJNemj-a5SVLo9sK5GUPFfnkwbClinU5zIVQsveXaWunYwVGwngtz6zSfWUtPoDrZNoq3MaF4Jvhxt6I9WEPMMRD30XENOY",
+            "label": null,
+            "main_ip": "207.246.91.210",
+            "netmask_v4": "255.255.254.0",
+            "os": "Ubuntu 22.04 x64",
+            "os_id": 1743,
+            "plan": "vhp-4c-8gb",
+            "power_status": "running",
+            "ram": 8192,
+            "region": "ewr",
+            "reserved_ip_id": null,
+            "script_id": null,
+            "server_status": "ok",
+            "snapshot_id": null,
+            "ssh_key_ids": [
+              "3b8c82ea-46f3-42f1-bdea-f396d6e16e6b"
+            ],
+            "status": "active",
+            "tags": [],
+            "timeouts": null,
+            "user_data": "#cloud-config\n# Cloud-init configuration for Nomad server nodes\n# This script installs and configures Nomad, Docker, and required dependencies\n\npackage_update: true\npackage_upgrade: true\n\npackages:\n  - unzip\n  - curl\n  - jq\n  - wget\n  - htop\n  - net-tools\n  - ufw\n\n# Disable UFW initially for easier setup\nruncmd:\n  # Disable UFW firewall (will be configured via Vultr firewall groups)\n  - sudo ufw --force disable\n  \n  # Install Docker\n  - curl -fsSL https://get.docker.com -o get-docker.sh\n  - sh get-docker.sh\n  - usermod -aG docker root\n  - systemctl enable docker\n  - systemctl start docker\n  \n  # Install Nomad\n  - NOMAD_VERSION=\"1.9.3\"\n  - cd /tmp\n  - curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip\n  - unzip nomad.zip\n  - chmod +x nomad\n  - mv nomad /usr/local/bin/nomad\n  - rm nomad.zip\n  \n  # Create Nomad user and directories\n  - useradd --system --home /etc/nomad.d --shell /bin/false nomad\n  - mkdir -p /opt/nomad\n  - mkdir -p /etc/nomad.d\n  - chown -R nomad:nomad /opt/nomad\n  - chown -R nomad:nomad /etc/nomad.d\n  \n  # Create Nomad configuration\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/nomad.d/nomad.hcl\n    # Nomad Server Configuration\n    data_dir = \"/opt/nomad\"\n    bind_addr = \"0.0.0.0\"\n    \n    datacenter = \"dc1\"\n    region     = \"global\"\n    \n    # Server configuration\n    server {\n      enabled          = true\n      bootstrap_expect = 3\n      \n      server_join {\n        retry_join = [\"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\", \"{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}\"]\n        retry_max      = 3\n        retry_interval = \"15s\"\n      }\n    }\n    \n    # Client configuration (disabled on servers)\n    client {\n      enabled = false\n    }\n    \n    # Advertise addresses\n    advertise {\n      http = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4646\"\n      rpc  = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4647\"\n      serf = \"{{ GetPrivateInterfaces | attr \\\"address\\\" }}:4648\"\n    }\n    \n    # Ports configuration\n    ports {\n      http = 4646\n      rpc  = 4647\n      serf = 4648\n    }\n    \n    # ACL configuration (disabled for MVP)\n    acl {\n      enabled = false\n    }\n    \n    # TLS configuration (disabled for MVP)\n    tls {\n      http = false\n      rpc  = false\n    }\n    \n    # Logging\n    log_level = \"INFO\"\n    log_file  = \"/var/log/nomad/\"\n    \n    # Performance tuning\n    limits {\n      https_handshake_timeout   = \"5s\"\n      http_max_conns_per_client = 100\n      rpc_handshake_timeout     = \"5s\"\n      rpc_max_conns_per_client  = 100\n    }\n    EOF\n  \n  # Create Nomad systemd service\n  - |\n    cat \u003c\u003c 'EOF' \u003e /etc/systemd/system/nomad.service\n    [Unit]\n    Description=Nomad\n    Documentation=https://www.nomadproject.io/docs/\n    Wants=network-online.target\n    After=network-online.target\n    ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl\n    \n    [Service]\n    Type=notify\n    User=nomad\n    Group=nomad\n    ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl\n    ExecReload=/bin/kill -HUP $MAINPID\n    KillMode=process\n    Restart=on-failure\n    LimitNOFILE=65536\n    \n    [Install]\n    WantedBy=multi-user.target\n    EOF\n  \n  # Create log directory\n  - mkdir -p /var/log/nomad\n  - chown nomad:nomad /var/log/nomad\n  \n  # Set proper permissions\n  - chmod 640 /etc/nomad.d/nomad.hcl\n  - chown nomad:nomad /etc/nomad.d/nomad.hcl\n  \n  # Enable and start Nomad service\n  - systemctl daemon-reload\n  - systemctl enable nomad\n  - systemctl start nomad\n  \n  # Wait for Nomad to start\n  - sleep 30\n  \n  # Configure firewall rules for VPC communication\n  - ufw --force enable\n  - ufw allow from 10.0.0.0/16\n  - ufw allow 22/tcp\n  - ufw reload\n  \n  # Set hostname\n  - hostnamectl set-hostname vexa-server-3-bd5f90e2\n  \n  # Log completion\n  - echo \"Nomad server setup completed at $(date)\" \u003e\u003e /var/log/cloud-init-output.log\n\nwrite_files:\n  - path: /etc/profile.d/nomad.sh\n    content: |\n      export NOMAD_ADDR=http://127.0.0.1:4646\n    permissions: '0644'\n\n# Set timezone\ntimezone: UTC\n\n# Final reboot to ensure all services start properly\npower_state:\n  mode: reboot\n  condition: True ",
+            "user_scheme": "root",
+            "v6_main_ip": "",
+            "v6_network": "",
+            "v6_network_size": 0,
+            "vcpu_count": 4,
+            "vpc2_ids": null,
+            "vpc_ids": [
+              "0e830320-584a-46e9-9eaf-699ec0a11c2c"
+            ]
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "default_password"
+              }
+            ]
+          ],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjM2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "random_id.cluster",
+            "tls_private_key.ssh_key",
+            "vultr_firewall_group.nomad_cluster",
+            "vultr_ssh_key.main",
+            "vultr_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_load_balancer",
+      "name": "nomad_servers",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "attached_instances": [
+              "082b0221-8d71-4feb-b85a-04e2dd4f1671",
+              "c4309c83-c4be-4146-addd-8f0ec554cf54",
+              "de9ef47c-d013-44ed-baed-94aaecb443dc"
+            ],
+            "balancing_algorithm": "roundrobin",
+            "cookie_name": "",
+            "firewall_rules": [],
+            "forwarding_rules": [
+              {
+                "backend_port": 4646,
+                "backend_protocol": "tcp",
+                "frontend_port": 4646,
+                "frontend_protocol": "tcp",
+                "rule_id": "dc95de75cf108d2c"
+              }
+            ],
+            "has_ssl": false,
+            "health_check": [
+              {
+                "check_interval": 15,
+                "healthy_threshold": 2,
+                "path": "",
+                "port": 4646,
+                "protocol": "tcp",
+                "response_timeout": 5,
+                "unhealthy_threshold": 3
+              }
+            ],
+            "id": "4dc158ff-64a3-4de7-9aee-a4dbb441e24a",
+            "ipv4": "66.135.24.138",
+            "ipv6": "2001:19f0:0005:4085:ffff:ffff:ffff:ffff",
+            "label": "vexa-prod-nomad-lb",
+            "proxy_protocol": false,
+            "region": "ewr",
+            "ssl": [],
+            "ssl_redirect": false,
+            "status": "active",
+            "vpc": "0e830320-584a-46e9-9eaf-699ec0a11c2c"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "random_id.cluster",
+            "tls_private_key.ssh_key",
+            "vultr_firewall_group.nomad_cluster",
+            "vultr_instance.nomad_servers",
+            "vultr_ssh_key.main",
+            "vultr_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_ssh_key",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "date_created": "2025-06-30T18:11:41+00:00",
+            "id": "3b8c82ea-46f3-42f1-bdea-f396d6e16e6b",
+            "name": "vexa-deployment-key",
+            "ssh_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDQbrBiI2tGEUJ6NFaJIhs387Z2UY7iuJ+Zf4lAF4O2uc85guQGIAPB7EDNYBwlJxdV7hLDjZPvBVlOA2q6J9wFOXPszoN3miOZQXTqte2U4egyiE4UZC8Nyo6S3Bi0BII4sNw9vaSzQ9rDQ3XDYJ6jTTD8R9a5Y3WxnmNxSrqGZTfrjVbyX/YgAbhaF9nN/IfuRaJ8+65UMib66eHpy52247B7ujWr7DaPtZZfWLxiDeypJDKgmWfH6UK96iVrltFXrJPOp1vs0uwz+MBctYkxPTST4iFLyTpaml6+lPycwzo1VQHC7b/xPfZT9Oa6YN0W6IbTjyJ5tGHz59T5RcUuelzy55VWMLD1LpXdZNreLmgkEvKC8ExLselR8GeasK6yMnpvJAmUdhK7lFOAEqRS5g9qTvFsLigruu0Fyn9ISwJw+nb/1UqxGVht67Jh22NHLjQcJ4Ra/Fca3mnlIsSwen+Ll5VL3AcWJ3dNJ2doO0/jp4AyUzZxzVMEWUPjlmsXZZysimZAXahZbmngxlcHqFX0BVtmqgvooztOfZOlUsN46XAqzvuPi6cYHwDEGlg8GjHgegxkHvGYg5LvP51zODgo3XcTGAaNzYvMOiJRXJ9G/8VQQWGJNA29G9ZCgAM6lyLSBHNIZQv8aRe32wVeCUB8v7PQ19uun24ZZhos7Q=="
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "tls_private_key.ssh_key"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "vultr_vpc",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/vultr/vultr\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "date_created": "2025-06-30T18:11:39+00:00",
+            "description": "vexa-prod-vpc",
+            "id": "0e830320-584a-46e9-9eaf-699ec0a11c2c",
+            "region": "ewr",
+            "v4_subnet": "10.0.0.0",
+            "v4_subnet_mask": 16
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
