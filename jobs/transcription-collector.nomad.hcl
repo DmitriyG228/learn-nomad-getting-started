@@ -14,6 +14,7 @@ job "transcription-collector" {
     network {
       mode = "bridge"
       port "http" {
+        static = 8000  # Fixed port for stable access
         to = 8000
       }
     }
@@ -22,7 +23,7 @@ job "transcription-collector" {
       name = "transcription-collector"
       port = "http"
       provider = "nomad"
-      address_mode = "alloc"
+      address_mode = "host"  # Changed from "alloc" to "host" for cross-VM connectivity
 
       check {
         type     = "http"

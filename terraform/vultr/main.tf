@@ -125,6 +125,17 @@ resource "vultr_firewall_rule" "consul_dns_udp" {
   notes             = "Consul DNS UDP (internal)"
 }
 
+# Redis firewall rule for cross-VM connectivity
+resource "vultr_firewall_rule" "redis" {
+  firewall_group_id = vultr_firewall_group.nomad_cluster.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+  port              = "6379"
+  notes             = "Redis database (cross-VM access)"
+}
+
 # Generate random suffix for hostnames
 resource "random_id" "cluster" {
   byte_length = 4

@@ -21,10 +21,10 @@ job "vexa-bot" {
   }
 
   group "bot" {
-    # Ensure the bot lands on the dedicated bot node class (Phase 4.1)
+    # Ensure the bot lands on core nodes (workload clients suitable for bot workloads)
     constraint {
       attribute = "${node.class}"
-      value     = "bot"
+      value     = "core"
     }
 
     count = 1

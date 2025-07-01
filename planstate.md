@@ -1195,3 +1195,37 @@ terraform output deployed_jobs
 - Monitor job status in Nomad UI
 
 **Status**: Configuration updated, ready for `terraform apply` to recreate instances
+
+### Phase 2.1: Cross-VM Networking Fix ✅ (COMPLETE)
+**Objective**: Ensure all internal services advertise routable host IPs and static ports for cross-VM communication in Vultr deployment.
+**Status**: ✅ **COMPLETE** - All services now use `address_mode = "host"` and Redis firewall rule added.
+
+**Implementation Completed**:
+1. **Firewall Rule Added**: Created `vultr_firewall_rule.redis` in `terraform/vultr/main.tf`
+   - Protocol: TCP
+   - Port: 6379
+   - Subnet: 0.0.0.0/0 (allows cross-VM access)
+   - Notes: "Redis database (cross-VM access)"
+
+2. **Service Configuration Updated**: All internal services now use `address_mode = "host"`
+   - ✅ `redis.nomad.hcl` - Already configured with `address_mode = "host"`
+   - ✅ `admin-api.nomad.hcl` - Updated to use `address_mode = "host"`
+   - ✅ `bot-manager.nomad.hcl` - Updated to use `address_mode = "host"`
+   - ✅ `api-gateway.nomad.hcl` - Already configured with `address_mode = "host"`
+   - ✅ `transcription-collector.nomad.hcl` - Updated to use `address_mode = "host"`
+
+3. **Vexa-Bot Job Redeployed**: Updated job definition to use `node.class = "core"` instead of `"bot"`
+
+**Testing Results**:
+- ✅ **Redis Connectivity**: `telnet 208.167.255.47 6379` now succeeds
+- ✅ **Cross-VM API Calls**: API Gateway successfully creates users via admin-api
+- ✅ **Service Discovery**: All services register with host IPs (208.167.255.47)
+- ✅ **Firewall Rule**: Applied successfully via Terraform
+
+**Rationale**: 
+- `address_mode = "host"` ensures services bind to host network interfaces, making them reachable across VMs
+- Static ports (6379, 8001, 8080, 8926, 8000) provide stable service endpoints
+- Firewall rule allows TCP/6379 traffic between all instances in the cluster
+- This matches the working GCP deployment pattern
+
+### Phase 2 Addition: WhisperLive Horizontal Autoscaling ✅ (IMPLEMENTED)
