@@ -51,6 +51,17 @@ job "bot-manager" {
         LOG_LEVEL = "DEBUG"
       }
 
+      # Template for Nomad server discovery using load balancer
+      template {
+        data = <<EOH
+# Use the load balancer IP for Nomad access (same as UI access)
+# This is the stable endpoint that load balances across all Nomad servers
+NOMAD_ADDR=http://104.207.128.138:4646
+EOH
+        destination = "local/nomad.env"
+        env         = true
+      }
+
       # Wait for dependencies to be available
       template {
         data = <<EOH
