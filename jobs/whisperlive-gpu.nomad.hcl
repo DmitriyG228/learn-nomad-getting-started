@@ -9,9 +9,9 @@ job "whisperlive-gpu" {
   }
 
   update {
-    max_parallel = 1
-    healthy_deadline = "45s"
-    progress_deadline = "1m"
+    max_parallel       = 1
+    healthy_deadline   = "5m"
+    progress_deadline  = "10m"
   }
 
   group "whisperlive" {
@@ -134,7 +134,7 @@ EOH
       # GPU device requirement using proper Nomad device syntax
       resources {
         cpu    = 2000  # MHz - GPU processing needs CPU support
-        memory = 8192  # MB - Increased from 6144 to prevent OOM kills
+        memory = 7168  # MB - Adjusted to fit GPU node's 7.7 GiB RAM
         
         # Request NVIDIA GPU using device stanza
         device "nvidia/gpu" {

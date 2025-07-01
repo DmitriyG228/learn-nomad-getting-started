@@ -182,7 +182,7 @@ resource "vultr_instance" "nomad_servers" {
     retry_join = local.server_retry_joins[count.index]
     hostname   = "${var.project_name}-server-${count.index + 1}-${local.cluster_id}"
     CONSUL_VERSION = "1.18.0"
-    NOMAD_VERSION = "1.9.3"
+            NOMAD_VERSION = "1.10.2"
     node_class = "management"
   })
 

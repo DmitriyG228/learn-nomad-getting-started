@@ -26,6 +26,24 @@ runcmd:
   - systemctl enable docker
   - systemctl start docker
   
+%{ if gpu_enabled ~}
+  # Install NVIDIA drivers and container toolkit for GPU support
+  # Following NVIDIA's official installation guide
+  - apt-get update
+  - apt-get install -y ubuntu-drivers-common
+  - ubuntu-drivers autoinstall
+  
+  # Install NVIDIA Container Toolkit
+  - curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+  - curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+  - apt-get update
+  - apt-get install -y nvidia-container-toolkit
+  
+  # Configure Docker to use NVIDIA runtime
+  - nvidia-ctk runtime configure --runtime=docker
+  - systemctl restart docker
+%{ endif ~}
+  
   # Install Consul (industry standard service discovery for Nomad)
   - CONSUL_VERSION="1.18.0"
   - cd /tmp
@@ -134,6 +152,18 @@ runcmd:
   - mv nomad /usr/local/bin/nomad
   - rm nomad.zip
   
+  # Install CNI plugins for Nomad networking
+  - CNI_VERSION="1.3.0"
+  - mkdir -p /opt/cni/bin
+  - cd /tmp
+  - curl -sSL https://github.com/containernetworking/plugins/releases/download/v$${CNI_VERSION}/cni-plugins-linux-amd64-v$${CNI_VERSION}.tgz -o cni-plugins.tgz
+  - tar -C /opt/cni/bin -xzf cni-plugins.tgz
+  - chmod +x /opt/cni/bin/*
+  - rm cni-plugins.tgz
+  
+  # Create CNI configuration directory
+  - mkdir -p /etc/cni/net.d
+  
   # Create Nomad user and directories
   - useradd --system --home /etc/nomad.d --shell /bin/false nomad
   - mkdir -p /opt/nomad
@@ -172,6 +202,17 @@ runcmd:
         retry_max      = 3
         retry_interval = "15s"
       }
+      
+      # CNI plugins configuration
+      cni_path = "/opt/cni/bin"
+      cni_config_dir = "/etc/cni/net.d"
+      
+      %{ if gpu_enabled ~}
+      # GPU-specific metadata for job placement
+      meta {
+        gpu_enabled = "true"
+      }
+      %{ endif ~}
     }
     
     # Advertise addresses - use actual private IP
@@ -203,7 +244,33 @@ runcmd:
     log_level = "INFO"
     log_file  = "/var/log/nomad/"
     
-    # Performance tuning
+    # Plugin configuration
+    plugin "docker" {
+      config {
+        allow_privileged = true
+        volumes {
+          enabled = true
+        }
+      }
+    }
+    
+                    plugin "raw_exec" {
+                  config {
+                    enabled = false
+                  }
+                }
+                
+                %{ if gpu_enabled ~}
+                # NVIDIA GPU device plugin configuration (built into Nomad 1.10+)
+                plugin "nvidia" {
+                  config {
+                    enabled = true
+                    fingerprint_period = "1m"
+                  }
+                }
+                %{ endif ~}
+                
+                # Performance tuning
     limits {
       https_handshake_timeout   = "5s"
       http_max_conns_per_client = 100

@@ -18,7 +18,7 @@ vpc_cidr = "10.0.0.0/16"
 nomad_server_count = 3  # Must be odd number for quorum (1, 3, 5, 7)
 nomad_datacenter   = "dc1"
 nomad_region      = "global"
-nomad_version     = "1.9.3"
+nomad_version     = "1.10.2"
 
 # Client Node Counts (adjust based on workload requirements)
 nomad_client_static_count    = 2  # For redis, admin-api, bot-manager

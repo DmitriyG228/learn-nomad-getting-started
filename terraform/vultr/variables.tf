@@ -118,7 +118,7 @@ variable "allowed_http_cidr" {
 variable "nomad_version" {
   description = "Version of Nomad to install"
   type        = string
-  default     = "1.9.3"
+  default     = "1.10.2"
 }
 
 variable "nomad_datacenter" {
