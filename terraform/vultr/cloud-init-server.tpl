@@ -167,9 +167,12 @@ runcmd:
       }
     }
     
-    # Client configuration (disabled on servers)
+    # Client configuration (servers can also run jobs)
     client {
-      enabled = false
+      enabled = true
+      
+      # Set node class for job placement
+      node_class = "${node_class}"
     }
     
     # Advertise addresses - use actual private IP
@@ -222,8 +225,8 @@ runcmd:
     
     [Service]
     Type=notify
-    User=nomad
-    Group=nomad
+    User=root
+    Group=root
     ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl
     ExecReload=/bin/kill -HUP $MAINPID
     KillMode=process

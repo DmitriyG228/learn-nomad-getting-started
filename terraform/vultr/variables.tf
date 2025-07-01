@@ -150,3 +150,42 @@ variable "tags" {
     ManagedBy   = "terraform"
   }
 } 
+
+# Database Configuration for Nomad Jobs
+variable "db_host" {
+  description = "External PostgreSQL database host"
+  type        = string
+  default     = "172.17.0.1"  # Default Docker host IP for external postgres
+}
+
+variable "db_port" {
+  description = "External PostgreSQL database port"
+  type        = string
+  default     = "25432"  # Default external postgres port
+}
+
+variable "db_name" {
+  description = "PostgreSQL database name"
+  type        = string
+  default     = "vexa"
+}
+
+variable "db_user" {
+  description = "PostgreSQL database user"
+  type        = string
+  default     = "postgres"
+}
+
+variable "db_password" {
+  description = "PostgreSQL database password"
+  type        = string
+  sensitive   = true
+  default     = "postgres"
+}
+
+variable "admin_api_token" {
+  description = "Admin API authentication token"
+  type        = string
+  sensitive   = true
+  default     = "vexa-admin-token-2024"
+} 

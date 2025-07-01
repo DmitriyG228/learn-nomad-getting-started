@@ -20,9 +20,17 @@ terraform {
       source = "hashicorp/null"
       version = "~> 3.2"
     }
+    nomad = {
+      source  = "hashicorp/nomad"
+      version = ">= 1.4.19"
+    }
   }
 }
 
 provider "vultr" {
   api_key = var.VULTR_API_KEY
+}
+
+provider "nomad" {
+  address = "http://${vultr_load_balancer.nomad_servers.ipv4}:4646"
 }

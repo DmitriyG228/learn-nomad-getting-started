@@ -59,3 +59,14 @@ tags = {
 
 # Docker Configuration
 docker_version = "latest" 
+
+# Database Configuration for Nomad Jobs
+# These connect to an external PostgreSQL database (e.g., running in Docker)
+db_host     = "172.17.0.1"  # Docker host IP for external postgres container
+db_port     = "25432"       # External postgres port
+db_name     = "vexa"        # Database name
+db_user     = "postgres"    # Database user
+db_password = "postgres"    # Database password (change in production)
+
+# Admin API Configuration
+admin_api_token = "vexa-admin-token-2024"  # Admin API authentication token (change in production) 

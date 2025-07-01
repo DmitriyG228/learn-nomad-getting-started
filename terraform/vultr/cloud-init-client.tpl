@@ -162,6 +162,9 @@ runcmd:
     client {
       enabled = true
       
+      # Set node class for job placement
+      node_class = "${node_class}"
+      
       # Industry standard: Use Consul for service discovery
       # This follows HashiCorp's official patterns for robust cluster formation
       server_join {
@@ -221,8 +224,8 @@ runcmd:
     
     [Service]
     Type=notify
-    User=nomad
-    Group=nomad
+    User=root
+    Group=root
     ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d/nomad.hcl
     ExecReload=/bin/kill -HUP $MAINPID
     KillMode=process

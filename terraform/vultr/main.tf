@@ -183,6 +183,7 @@ resource "vultr_instance" "nomad_servers" {
     hostname   = "${var.project_name}-server-${count.index + 1}-${local.cluster_id}"
     CONSUL_VERSION = "1.18.0"
     NOMAD_VERSION = "1.9.3"
+    node_class = "management"
   })
 
   # Wait for VPC to be ready
@@ -220,7 +221,7 @@ resource "vultr_instance" "nomad_clients_static" {
     region               = var.nomad_region
     vpc_cidr            = "10.0.0.0/16"
     hostname            = "${var.project_name}-client-static-${count.index + 1}-${local.cluster_id}"
-    node_class          = "static"
+    node_class          = "core"
     gpu_enabled         = false
   })
 
@@ -259,7 +260,7 @@ resource "vultr_instance" "nomad_clients_workload" {
     region               = var.nomad_region
     vpc_cidr            = "10.0.0.0/16"
     hostname            = "${var.project_name}-client-workload-${count.index + 1}-${local.cluster_id}"
-    node_class          = "workload"
+    node_class          = "core"
     gpu_enabled         = false
   })
 
@@ -458,3 +459,85 @@ output "next_steps" {
 # --- Post provisioning: push Consul retry list and restart services ---
 # REMOVED: null_resource approach was causing infinite loops
 # Instead, we'll use templatefile to embed retry_join configuration directly 
+
+# --- Nomad Job Deployment ---
+
+# Wait for Nomad cluster to be ready before deploying jobs
+resource "null_resource" "wait_for_nomad" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Waiting for Nomad cluster to be ready..."
+      for i in {1..30}; do
+        if curl -s http://${vultr_load_balancer.nomad_servers.ipv4}:4646/v1/status/leader > /dev/null 2>&1; then
+          echo "Nomad cluster is ready!"
+          break
+        fi
+        echo "Attempt $i/30: Waiting for Nomad cluster..."
+        sleep 10
+      done
+    EOT
+  }
+
+  depends_on = [vultr_load_balancer.nomad_servers]
+}
+
+# Create Nomad variables for database configuration
+resource "nomad_variable" "database" {
+  path = "secret/vexa/db"
+
+  items = {
+    host     = var.db_host
+    port     = var.db_port
+    name     = var.db_name
+    user     = var.db_user
+    password = var.db_password
+  }
+
+  depends_on = [null_resource.wait_for_nomad]
+}
+
+# Create Nomad variable for admin API token
+resource "nomad_variable" "admin_api" {
+  path = "secret/vexa/admin-api"
+
+  items = {
+    token = var.admin_api_token
+  }
+
+  depends_on = [null_resource.wait_for_nomad]
+}
+
+# Get a list of all .nomad.hcl files in the jobs directory
+locals {
+  job_files = fileset("${path.module}/../../jobs", "*.nomad.hcl")
+}
+
+# Deploy all Nomad jobs
+resource "nomad_job" "vexa_services" {
+  for_each = local.job_files
+
+  jobspec = file("${path.module}/../../jobs/${each.value}")
+
+  # Ensure jobs are deployed after variables are created
+  depends_on = [nomad_variable.database, nomad_variable.admin_api]
+}
+
+# Output deployed jobs status
+output "deployed_jobs" {
+  description = "Status of deployed Nomad jobs"
+  value = {
+    for job_name, job in nomad_job.vexa_services : job_name => {
+      id     = job.id
+      name   = job.name
+      status = job.status
+    }
+  }
+}
+
+output "nomad_variables_managed" {
+  description = "Nomad variables managed by this Terraform configuration"
+  value = [
+    nomad_variable.database.path,
+    nomad_variable.admin_api.path
+  ]
+} 

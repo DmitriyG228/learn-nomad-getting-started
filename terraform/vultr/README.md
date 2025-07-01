@@ -123,6 +123,86 @@ terraform output nomad_ui_url
 # Example: http://45.77.123.456:4646
 ```
 
+## Automatic Job Deployment
+
+**NEW**: The Vultr deployment now includes automatic deployment of all Vexa services from the `/jobs` directory!
+
+### How It Works
+
+The Terraform configuration automatically:
+1. **Waits for Nomad cluster** to be ready
+2. **Creates Nomad Variables** for database credentials and API tokens
+3. **Deploys all 12 services** from the `/jobs` directory
+4. **Configures service discovery** via Consul
+
+### Complete Deployment
+
+Instead of manually deploying jobs after infrastructure, you can now do everything in one command:
+
+```bash
+# Deploy infrastructure AND all jobs automatically
+terraform apply -auto-approve
+
+# Or use the deployment script
+./deploy-jobs.sh
+```
+
+### Database Configuration
+
+Before deploying, configure your external PostgreSQL database in `terraform.tfvars`:
+
+```hcl
+# Database Configuration for Nomad Jobs
+db_host     = "your-db-host"      # External PostgreSQL host
+db_port     = "5432"              # PostgreSQL port
+db_name     = "vexa"              # Database name
+db_user     = "postgres"          # Database user
+db_password = "your-password"     # Database password
+admin_api_token = "your-token"    # Admin API token
+```
+
+### Deployed Services
+
+The following services are automatically deployed:
+
+| Service | Purpose | Node Class |
+|---------|---------|------------|
+| `redis` | Cache and session storage | Static |
+| `admin-api` | User management API | Static |
+| `bot-manager` | Bot orchestration | Static |
+| `api-gateway` | Request routing | Static |
+| `transcription-collector` | Data processing | Static |
+| `whisperlive-cpu` | Speech processing (CPU) | Workload |
+| `whisperlive-gpu` | Speech processing (GPU) | GPU |
+| `vexa-bot` | Meeting bot instances | Workload |
+| `prometheus` | Metrics collection | Static |
+| `nomad-autoscaler` | Auto-scaling | Static |
+| `whisperlive-metrics-exporter` | Custom metrics | Static |
+| `db-init` | Database initialization | Static |
+
+### Verification
+
+After deployment, verify all services are running:
+
+```bash
+# Check job status
+terraform output deployed_jobs
+
+# Access Nomad UI to monitor
+terraform output nomad_ui_url
+
+# Test API Gateway
+curl http://$(terraform output -raw load_balancer_ip):8926/health
+```
+
+### Benefits
+
+- **One-Click Deployment**: Infrastructure + services in single command
+- **Secret Management**: Database credentials stored securely in Nomad Variables
+- **No Manual Steps**: Eliminates post-deployment job registration
+- **Infrastructure as Code**: Complete deployment defined in Terraform
+- **Production Ready**: Includes monitoring, autoscaling, and load balancing
+
 ## Infrastructure Components
 
 ### Instance Types and Sizing
