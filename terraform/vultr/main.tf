@@ -1,13 +1,12 @@
-# Generate SSH key pair for instances
-resource "tls_private_key" "ssh_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
+# Use local SSH public key for instances
+data "local_file" "ssh_public_key" {
+  filename = pathexpand("~/.ssh/id_rsa.pub")
 }
 
 # Upload SSH public key to Vultr
 resource "vultr_ssh_key" "main" {
   name    = var.ssh_key_name
-  ssh_key = tls_private_key.ssh_key.public_key_openssh
+  ssh_key = data.local_file.ssh_public_key.content
 }
 
 # Create VPC network
@@ -345,14 +344,6 @@ resource "vultr_load_balancer" "nomad_servers" {
   }
 
   attached_instances = vultr_instance.nomad_servers[*].id
-}
-
-# Save SSH private key locally
-resource "local_file" "ssh_private_key" {
-  content         = tls_private_key.ssh_key.private_key_pem
-  filename        = "${path.module}/ssh-key-vexa-prod.pem"
-  file_permission = "0600"
-  directory_permission = "0777"
 }
 
 # Outputs

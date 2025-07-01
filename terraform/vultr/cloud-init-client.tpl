@@ -28,20 +28,31 @@ runcmd:
   
 %{ if gpu_enabled ~}
   # Install NVIDIA drivers and container toolkit for GPU support
-  # Following NVIDIA's official installation guide
+  # Following NVIDIA's official installation guide and Nomad device plugin requirements
+  
+  # 1. Kernel: switch to legacy cgroups (Nomad <1.6 requirement for device plugins)
+  - sed -i 's/GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="systemd.unified_cgroup_hierarchy=0 /' /etc/default/grub
+  - update-grub
+  
+  # 2. Install official NVIDIA driver (DKMS)
   - apt-get update
   - apt-get install -y ubuntu-drivers-common
   - ubuntu-drivers autoinstall
   
-  # Install NVIDIA Container Toolkit
+  # 3. Install NVIDIA Container Toolkit (runtime + hook library)
+  - distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
   - curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-  - curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+  - curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
   - apt-get update
   - apt-get install -y nvidia-container-toolkit
   
-  # Configure Docker to use NVIDIA runtime
+  # 4. Configure Docker to use NVIDIA runtime
   - nvidia-ctk runtime configure --runtime=docker
   - systemctl restart docker
+  
+  # 5. Validation: Ensure NVIDIA setup is working
+  - nvidia-smi || echo "NVIDIA driver not ready yet"
+  - docker info | grep -A2 Runtimes || echo "Docker runtime check failed"
 %{ endif ~}
   
   # Install Consul (industry standard service discovery for Nomad)
@@ -172,6 +183,18 @@ runcmd:
   - chown -R nomad:nomad /opt/nomad
   - chown -R nomad:nomad /opt/alloc_mounts
   - chown -R nomad:nomad /etc/nomad.d
+
+  %{ if gpu_enabled ~}
+  # Install NVIDIA device plugin for GPU nodes
+  - mkdir -p /opt/nomad/plugins
+  - cd /opt/nomad/plugins
+  - wget -O nomad-device-nvidia.zip https://releases.hashicorp.com/nomad-device-nvidia/1.1.0/nomad-device-nvidia_1.1.0_linux_amd64.zip
+  - unzip nomad-device-nvidia.zip
+  - chmod +x nomad-device-nvidia
+  - rm nomad-device-nvidia.zip LICENSE.txt
+  - chown -R nomad:nomad /opt/nomad/plugins
+  - echo "NVIDIA device plugin installed at $(date)" >> /var/log/cloud-init-output.log
+  %{ endif ~}
   
   # Create Nomad configuration with Consul integration
   - |
@@ -254,21 +277,21 @@ runcmd:
       }
     }
     
-                    plugin "raw_exec" {
-                  config {
-                    enabled = false
-                  }
-                }
-                
-                %{ if gpu_enabled ~}
-                # NVIDIA GPU device plugin configuration (built into Nomad 1.10+)
-                plugin "nvidia" {
-                  config {
-                    enabled = true
-                    fingerprint_period = "1m"
-                  }
-                }
-                %{ endif ~}
+    plugin "raw_exec" {
+      config {
+        enabled = false
+      }
+    }
+    
+    %{ if gpu_enabled ~}
+    # NVIDIA GPU device plugin configuration (external plugin required)
+    plugin "nomad-device-nvidia" {
+      config {
+        enabled = true
+        fingerprint_period = "1m"
+      }
+    }
+    %{ endif ~}
                 
                 # Performance tuning
     limits {

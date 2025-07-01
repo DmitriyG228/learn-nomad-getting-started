@@ -70,6 +70,15 @@ EOH
 - ✅ **Cluster Health**: 4 Nomad clients registered (2 core + 2 bot instances)
 - ✅ **Docker Driver Issue**: RESOLVED - Major breakthrough implementing root user requirement
 
+### Phase 3.1: GPU Setup Issue Diagnosis 🔄 (IN PROGRESS)
+**Objective**: Resolve WhisperLive GPU job placement failures.
+**Status**: 
+- ❌ **Issue**: WhisperLive GPU job in "pending" status with placement failures
+- ✅ **Root Cause**: NVIDIA device plugin not running (only docker, exec, mock_driver detected)
+- ✅ **Environment Check**: Docker NVIDIA runtime configured correctly (`driver.docker.runtimes = nvidia`)
+- ✅ **Node Meta**: GPU node has `gpu_enabled = true` metadata
+- 🔄 **Solution**: Need to enable NVIDIA device plugin in Nomad client configuration
+
 ### Phase 3.0-B: Cloud Database Integration 🔄 (IN PROGRESS)
 **Objective**: Wire application containers to Cloud SQL PostgreSQL instance.
 **Status**:

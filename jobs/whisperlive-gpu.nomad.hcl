@@ -60,9 +60,11 @@ job "whisperlive-gpu" {
     network {
       mode = "bridge"
       port "ws" {
+        static = 9090  # Fixed port for stable access
         to = 9090
       }
       port "health" {
+        static = 9091  # Fixed port for stable access
         to = 9091
       }
     }
@@ -71,7 +73,7 @@ job "whisperlive-gpu" {
       name = "whisperlive-gpu"
       port = "ws"
       provider = "nomad"
-      address_mode = "alloc"
+      address_mode = "host"  # Changed from "alloc" to "host" for cross-VM connectivity
 
       check {
         type     = "http"
